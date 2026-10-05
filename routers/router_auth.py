@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from database import get_db
+from models.enums import PerfilUsuarioEnum
 from schemas.usuario import LoginRequest, LoginResponse, AlterarSenhaRequest, EditarPerfilRequest, UsuarioCreate, UsuarioResponse
 from service import usuario_service
 
@@ -21,6 +22,9 @@ def cadastrar_usuario(dados_usuario: UsuarioCreate, db: Session = Depends(get_db
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Já existe um usuário cadastrado com este e-mail."
         )
+
+    # O cadastro público cria apenas moradores. Síndicos são cadastrados pelo Administrador (RF12)
+    dados_usuario.perfil = PerfilUsuarioEnum.Morador
     
     # Cria o novo usuário no banco
     novo_usuario = usuario_service.criar_usuario(db, dados_usuario)
@@ -43,7 +47,8 @@ def login(credenciais: LoginRequest, db: Session = Depends(get_db)):
     return {
         "access_token": token_jwt,
         "token_type": "bearer",
-        "requer_troca_senha": usuario.senha_provisoria # RN13
+        # RN13: Síndicos recebem senha provisória do Administrador e devem trocá-la no primeiro acesso
+        "requer_troca_senha": usuario.primeiro_acesso and usuario.perfil == PerfilUsuarioEnum.Sindico
     }
 
 @router_auth.patch("/me/senha", response_model=UsuarioResponse)
@@ -52,7 +57,7 @@ def alterar_senha_propria(
     db: Session = Depends(get_db), 
     usuario_atual = Depends(get_usuario_atual)
 ):
-    """RF14, RF15, RN13 - Permite a troca de senha e remove a flag de senha provisória."""
+    """RF14, RF15, RN13 - Permite a troca de senha (inclusive da senha provisória)."""
     try:
         usuario_atualizado = usuario_service.alterar_senha(
             db=db, 
@@ -71,14 +76,17 @@ def editar_perfil(
     usuario_atual = Depends(get_usuario_atual)
 ):
     """RF14 - Permite que o usuário (ex: Morador) atualize seu e-mail de contato."""
-    # Valida se o novo e-mail já está em uso por outra pessoa
-    email_existente = usuario_service.buscar_por_email(db, dados_perfil.novo_email)
+    # Valida se o novo e-mail já está em uso por outra pessoa (inclusive usuários inativados, pois o e-mail é UNIQUE)
+    email_existente = usuario_service.obter_usuario_por_email(db, dados_perfil.novo_email)
     if email_existente and email_existente.id != usuario_atual["id"]:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="E-mail já está em uso.")
     
-    usuario_atualizado = usuario_service.atualizar_perfil(
-        db=db, 
-        id_usuario=usuario_atual["id"], 
-        novo_email=dados_perfil.novo_email
-    )
-    return usuario_atualizado
+    try:
+        usuario_atualizado = usuario_service.atualizar_perfil(
+            db=db, 
+            id_usuario=usuario_atual["id"], 
+            novo_email=dados_perfil.novo_email
+        )
+        return usuario_atualizado
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from database import get_db
-from schemas.chamado import ChamadoCreate, ChamadoCriadoComAviso, ChamadoResponse, ChamadoStatusUpdate, ChamadoDetalheResponse
+from schemas.chamado import ChamadoCreate, ChamadoCriadoComAviso, ChamadoResponse, ChamadoStatusUpdate, ChamadoDetalheResponse, HistoricoChamadoResponse
 from service import chamado_service
 
 # Dependência fictícia de autenticação (será implementada no router_auth)
@@ -22,8 +22,7 @@ def abrir_chamado(
     if usuario["perfil"] != "Morador":
         raise HTTPException(status_code=403, detail="Apenas moradores podem abrir chamados.")
     
-    # O service já retorna exatamente {"chamado": ..., "aviso_similaridade": ...}
-    # Então agora o FastAPI vai aceitar direto!
+    # O service retorna {"chamado": ..., "aviso_similaridade": ...}, no formato de ChamadoCriadoComAviso
     return chamado_service.criar_chamado(db, chamado_dados, usuario["id"])
 
 @router_chamados.get("/mural", response_model=List[ChamadoResponse])
@@ -58,6 +57,15 @@ def detalhar_chamado(
     if not chamado:
         raise HTTPException(status_code=404, detail="Chamado não encontrado.")
     return chamado
+
+@router_chamados.get("/{id_chamado}/historico", response_model=List[HistoricoChamadoResponse])
+def listar_historico_chamado(
+    id_chamado: int,
+    db: Session = Depends(get_db),
+    usuario=Depends(get_usuario_atual)
+):
+    """RN03 - Linha do tempo das mudanças de status do chamado."""
+    return chamado_service.listar_historico(db, id_chamado)
 
 @router_chamados.patch("/{id_chamado}/status", response_model=ChamadoResponse)
 def alterar_status_chamado(
