@@ -11,4 +11,6 @@ class UsuarioDB(Base):
     senha = Column(String(255), nullable=False) # Armazena a senha já criptografada (hash)
     perfil = Column(SQLEnum(PerfilUsuarioEnum, values_callable=lambda obj: [e.value for e in obj], name="perfil_usuario"), nullable=False)
     ultimo_acesso = Column(DateTime, nullable=True)
+    email_validado = Column(Boolean, nullable=False, default=True)     # RN12: FALSE até o síndico validar o e-mail pelo link
+    senha_provisoria = Column(Boolean, nullable=False, default=False)  # RN13: TRUE até o usuário trocar a senha provisória
     ativo = Column(Boolean, nullable=False, default=True)

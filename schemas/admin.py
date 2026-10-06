@@ -1,29 +1,6 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from typing import List, Optional
-from models.enums import TipoCondominioEnum
-
-# ==========================================
-# UNIDADES
-# ==========================================
-class UnidadeCreate(BaseModel):
-    # Apartamento: informe "apartamento" (obrigatório) e "bloco" (opcional)
-    # Casa: informe "numero_casa" (obrigatório) e "rua" (opcional)
-    bloco: Optional[str] = Field(None, max_length=50, description="Bloco/torre (condomínio de apartamentos)")
-    apartamento: Optional[str] = Field(None, max_length=50, description="Número do apartamento")
-    rua: Optional[str] = Field(None, max_length=150, description="Rua interna (condomínio de casas)")
-    numero_casa: Optional[str] = Field(None, max_length=50, description="Número da casa")
-
-class UnidadeResponse(BaseModel):
-    id: int
-    id_condominio: int
-    tipo_condominio: TipoCondominioEnum
-    bloco: Optional[str] = None
-    apartamento: Optional[str] = None
-    rua: Optional[str] = None
-    numero_casa: Optional[str] = None
-    ativo: bool
-
-    model_config = ConfigDict(from_attributes=True)
+from schemas.unidade import UnidadeCreate
 
 # ==========================================
 # CONDOMÍNIO
@@ -36,9 +13,25 @@ class CondominioCreate(BaseModel):
     bairro: str = Field(..., max_length=100)
     cidade: str = Field(..., max_length=100)
     estado: str = Field(..., min_length=2, max_length=2, pattern=r"^[A-Za-z]{2}$", description="Sigla da UF (ex: PR)")
-    id_sindico: int = Field(..., description="ID do usuário síndico responsável (RN07)")
-    tipo_condominio: TipoCondominioEnum = Field(..., description="Casa ou Apartamento (aplicado a todas as unidades)")
-    unidades: List[UnidadeCreate] = Field(..., min_length=1, description="Lista de unidades a serem pré-cadastradas")
+    unidades: List[UnidadeCreate] = Field(..., min_length=1, description="Unidades e áreas comuns a serem pré-cadastradas")
+
+class CondominioUpdate(BaseModel):
+    # RN15: Edição permitida a qualquer momento (apenas os campos informados são alterados)
+    nome: Optional[str] = Field(None, min_length=3, max_length=100)
+    cep: Optional[str] = Field(None, max_length=20)
+    numero: Optional[str] = Field(None, max_length=6)
+    rua: Optional[str] = Field(None, max_length=150)
+    bairro: Optional[str] = Field(None, max_length=100)
+    cidade: Optional[str] = Field(None, max_length=100)
+    estado: Optional[str] = Field(None, min_length=2, max_length=2, pattern=r"^[A-Za-z]{2}$")
+
+class SindicoResumo(BaseModel):
+    id: int
+    nome: str
+    email: EmailStr
+    email_validado: bool # RN12: False -> exibir "Reenviar link de validação"
+
+    model_config = ConfigDict(from_attributes=True)
 
 class CondominioResponse(BaseModel):
     id: int
@@ -49,8 +42,19 @@ class CondominioResponse(BaseModel):
     bairro: str
     cidade: str
     estado: str
-    id_sindico: int
+    id_sindico: Optional[int] = None
+    sindico: Optional[SindicoResumo] = None
     ativo: bool
+    pode_inativar: Optional[bool] = None # RN15: Calculado na listagem do Administrador
+
+    model_config = ConfigDict(from_attributes=True)
+
+class CondominioPublicoResponse(BaseModel):
+    # RF06: Dropdown de condomínios da Tela de Cadastro (dados públicos)
+    id: int
+    nome: str
+    cidade: str
+    estado: str
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -58,13 +62,15 @@ class CondominioResponse(BaseModel):
 # SÍNDICO
 # ==========================================
 class SindicoCreate(BaseModel):
+    id_condominio: int = Field(..., description="Condomínio do qual o síndico será responsável (RN07)")
     nome: str = Field(..., min_length=3, max_length=150)
     email: EmailStr
-    id_condominio: Optional[int] = Field(None, description="Se informado, o síndico passa a ser o responsável por este condomínio (RN07)")
 
 class SindicoCriadoResponse(BaseModel):
     id_usuario: int
     nome: str
     email: EmailStr
     id_condominio: Optional[int] = None
-    senha_provisoria: str # Retornada apenas para demonstração, enquanto não há envio de e-mail (RN13)
+    # Retornados apenas para demonstração, enquanto não há envio real de e-mail (RN12, RN13)
+    senha_provisoria: str
+    link_validacao: str
