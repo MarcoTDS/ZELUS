@@ -1,4 +1,5 @@
-database.sql
+zelus_migracao_v3_para_v4.sql
+zelus_schema.sql
 database.py
 env
 
