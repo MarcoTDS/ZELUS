@@ -126,3 +126,175 @@ body[data-protegida] {
     width: 100%;
     text-align: left;
 }
+
+/* Quadros do resumo do dashboard (ex.: Abertos, Urgentes) */
+.resumo-item {
+    display: block;
+    height: 100%;
+    background: #fff;
+    border: 1px solid var(--zelus-borda);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+.resumo-item:hover {
+    border-color: var(--zelus-primaria);
+}
+
+.resumo-rotulo {
+    display: block;
+    color: var(--zelus-texto-suave);
+    font-size: 0.875rem;
+}
+
+.resumo-valor {
+    display: block;
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+/* Link "← Voltar" no topo das telas internas */
+.voltar {
+    display: inline-block;
+    color: var(--zelus-texto-suave);
+    font-size: 0.875rem;
+    text-decoration: none;
+    margin-bottom: 0.5rem;
+}
+
+.voltar:hover {
+    color: var(--zelus-primaria);
+}
+
+/* ==========================================
+   CHAMADOS (worklist, mural, meus chamados)
+   ========================================== */
+.item-chamado {
+    display: block;
+    background: #fff;
+    border: 1px solid var(--zelus-borda);
+    border-left-width: 4px;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+.item-chamado:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.item-chamado .detalhe {
+    color: var(--zelus-texto-suave);
+}
+
+/* RN04: cor conforme a urgência do SLA */
+.item-chamado.urgencia-vencido {
+    background: #fdf1f1;
+    border-color: #e9b4b4;
+    border-left-color: #9b1c1c;
+}
+
+.item-chamado.urgencia-vencido .detalhe {
+    color: #9b1c1c;
+}
+
+.item-chamado.urgencia-alta { border-left-color: #dc3545; }
+.item-chamado.urgencia-media { border-left-color: #f0a020; }
+.item-chamado.urgencia-baixa { border-left-color: #2e9d5b; }
+
+/* Selos de status do chamado */
+.selo-status { font-weight: 600; }
+.status-aberto { background: #7048e8; color: #fff; }
+.status-andamento { background: #f08c00; color: #fff; }
+.status-resolvido { background: #2e9d5b; color: #fff; }
+.status-cancelado { background: #868e96; color: #fff; }
+.status-vencido { background: #9b1c1c; color: #fff; }
+
+/* ==========================================
+   CADASTROS PENDENTES
+   ========================================== */
+.cartao-pendente {
+    background: #fff;
+    border: 1px solid var(--zelus-borda);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+}
+
+/* RN11: pedido para unidade que já tem responsável */
+.cartao-pendente.com-aviso {
+    background: #fdf1f1;
+    border-color: #e9b4b4;
+}
+
+/* ==========================================
+   NAVBAR COM MENU POR PERFIL
+   ========================================== */
+.pagina-larga {
+    max-width: 1080px;
+}
+
+#cabecalho .nav-link.active {
+    color: var(--zelus-primaria);
+    font-weight: 600;
+}
+
+#cabecalho .dropdown-item.active,
+#cabecalho .dropdown-item:active {
+    background-color: var(--zelus-primaria);
+    color: #fff;
+}
+
+#cabecalho .dropdown-toggle {
+    border: 0;
+    background: none;
+}
+
+/* Botão do usuário: nome e perfil empilhados, seta ao lado */
+#cabecalho .menu-usuario > .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+#cabecalho .menu-usuario > .dropdown-toggle::after {
+    margin-left: 0;
+}
+
+/* Menu do usuário alinhado pela direita (sem o JS do Bootstrap, o dropdown-menu-end não posiciona sozinho) */
+#cabecalho .menu-usuario > .dropdown-menu {
+    right: 0;
+    left: auto;
+}
+
+/* Telas pequenas: menu aberto em lista, submenus sem "flutuar" */
+@media (max-width: 991.98px) {
+    #menu-principal {
+        padding-top: 0.5rem;
+    }
+
+    #cabecalho .dropdown-menu {
+        border: 0;
+        padding-top: 0;
+        box-shadow: none;
+    }
+
+    #cabecalho .menu-usuario {
+        border-top: 1px solid var(--zelus-borda);
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+    }
+
+    /* No celular o menu do usuário abre dentro da lista, sem sobrepor */
+    #cabecalho .menu-usuario > .dropdown-menu {
+        position: static;
+        border: 0;
+        box-shadow: none;
+    }
+}
