@@ -71,6 +71,7 @@ class SindicoCriadoResponse(BaseModel):
     nome: str
     email: EmailStr
     id_condominio: Optional[int] = None
-    # Retornados apenas para demonstração, enquanto não há envio real de e-mail (RN12, RN13)
+    # Também enviados por e-mail ao síndico (RN12, RN13). Ficam no response para o caso de o envio falhar.
     senha_provisoria: str
     link_validacao: str
+    email_enviado: bool = False # True quando o servidor SMTP aceitou o e-mail

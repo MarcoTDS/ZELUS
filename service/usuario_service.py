@@ -148,7 +148,7 @@ def solicitar_redefinicao_senha(db: Session, email: str):
         usuario.email,
         "Zelus - Redefinição de senha",
         f"Olá, {usuario.nome}!\n\nPara definir uma nova senha, acesse o link abaixo (válido por 1 hora):\n"
-        f"{URL_FRONTEND}/redefinir-senha.html?token={token}"
+        f"{URL_FRONTEND}/views/auth/redefinir-senha.html?token={token}"
     )
 
 def redefinir_senha(db: Session, token: str, nova_senha: str):

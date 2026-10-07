@@ -130,10 +130,10 @@ def _enviar_acesso_sindico(db: Session, sindico: UsuarioDB, condominio_nome: str
 
     # RN12: Link de validação do e-mail (invalida links anteriores)
     token = token_service.gerar_token(db, sindico.id, TipoTokenEnum.Validacao_Email)
-    link_validacao = f"{URL_FRONTEND}/validar-email.html?token={token}"
+    link_validacao = f"{URL_FRONTEND}/views/auth/validar-email.html?token={token}"
     db.commit()
 
-    enviar_email(
+    email_enviado = enviar_email(
         sindico.email,
         "Zelus - Seu acesso como síndico",
         f"Olá, {sindico.nome}!\n\nVocê foi cadastrado como síndico do condomínio {condominio_nome}.\n"
@@ -142,13 +142,14 @@ def _enviar_acesso_sindico(db: Session, sindico: UsuarioDB, condominio_nome: str
         f"No primeiro acesso será obrigatório definir uma nova senha."
     )
 
-    # Para fins de demonstração (já que não há envio real de e-mail), os dados também são retornados no response
+    # Os dados de acesso também voltam no response: se o e-mail falhar, o administrador consegue repassá-los
     return {
         "id_usuario": sindico.id,
         "nome": sindico.nome,
         "email": sindico.email,
         "senha_provisoria": senha_plana,
-        "link_validacao": link_validacao
+        "link_validacao": link_validacao,
+        "email_enviado": email_enviado
     }
 
 def cadastrar_sindico(db: Session, dados: SindicoCreate):

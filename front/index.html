@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Zelus</title>
+</head>
+<body>
+    <!-- Ponto de entrada: leva o usuário à tela inicial dele ou ao login -->
+    <script type="module">
+        import { sessao } from "./scripts/shared/api.js";
+        import { rotaInicial } from "./scripts/shared/auth-guard.js";
+        import { ROTAS } from "./scripts/shared/config.js";
+
+        const usuario = sessao.obterToken() && sessao.obterUsuario();
+        window.location.replace(usuario ? rotaInicial(usuario) : ROTAS.login);
+    </script>
+</body>
+</html>

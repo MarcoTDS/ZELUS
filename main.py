@@ -1,3 +1,7 @@
+# 0. Carrega as variáveis do arquivo .env (SMTP, chave do JWT) antes de importar o restante da aplicação
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base

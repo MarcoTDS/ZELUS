@@ -9,7 +9,9 @@ from models.enums import PerfilUsuarioEnum
 from service import vinculo_service
 
 # RNF02: JWT com PyJWT (gratuito). Em produção, defina a variável de ambiente ZELUS_SECRET_KEY.
-SECRET_KEY = os.getenv("ZELUS_SECRET_KEY", "zelus-chave-de-desenvolvimento-troque-em-producao")
+SECRET_KEY = os.getenv("ZELUS_SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("ZELUS_SECRET_KEY não está definida.")
 ALGORITHM = "HS256"
 EXPIRACAO_TOKEN = timedelta(hours=8)
 

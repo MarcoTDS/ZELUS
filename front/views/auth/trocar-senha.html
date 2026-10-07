@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Defina sua senha | Zelus</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../styles/global.css" rel="stylesheet">
+</head>
+<body data-protegida>
+    <!-- 1.17 Tela Trocar Senha - 1º Acesso (RF16, RN13) -->
+    <main class="tela-auth">
+        <div class="cartao-auth">
+            <header class="mb-4">
+                <h1 class="h4 mb-1">Defina sua senha</h1>
+                <p class="texto-suave mb-0">
+                    Este é seu primeiro acesso. Por segurança, defina uma nova senha antes de continuar.
+                </p>
+            </header>
+
+            <div id="alerta"></div>
+
+            <form id="form-senha" novalidate>
+                <div class="mb-3">
+                    <label for="senha_atual" class="form-label">Senha provisória</label>
+                    <input type="password" class="form-control" id="senha_atual" name="senha_atual"
+                           autocomplete="current-password" required>
+                    <div class="invalid-feedback">Informe a senha provisória recebida.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="nova_senha" class="form-label">Nova senha</label>
+                    <input type="password" class="form-control" id="nova_senha" name="nova_senha"
+                           autocomplete="new-password" minlength="6" maxlength="72" required>
+                    <div class="invalid-feedback">A nova senha deve ter entre 6 e 72 caracteres.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="confirmar_nova_senha" class="form-label">Confirmar nova senha</label>
+                    <input type="password" class="form-control" id="confirmar_nova_senha" name="confirmar_nova_senha"
+                           autocomplete="new-password" required>
+                    <div class="invalid-feedback">A confirmação não confere com a nova senha.</div>
+                </div>
+
+                <button type="submit" id="btn-definir" class="btn btn-zelus w-100">Definir senha e continuar</button>
+            </form>
+
+            <p class="text-center small mt-3 mb-0">
+                <a href="#" id="link-sair">Sair</a>
+            </p>
+        </div>
+    </main>
+
+    <script type="module" src="../../scripts/auth/trocar-senha.js"></script>
+</body>
+</html>

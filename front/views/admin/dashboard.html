@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Zelus</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="../../styles/global.css" rel="stylesheet">
+</head>
+<body data-protegida>
+    <header id="cabecalho"></header>
+
+    <!-- 1.19 Tela Dashboard do Perfil Administrador (RF04) -->
+    <main class="container pagina conteudo">
+        <h1 class="h4 titulo-pagina mb-3">
+            <span class="sobretitulo">Dashboard</span>
+            Administrador
+        </h1>
+
+        <div id="alerta"></div>
+
+        <div class="d-grid gap-2">
+            <a href="condominio.html" class="btn btn-outline-secondary bg-white text-body atalho">
+                <i class="bi bi-building"></i> Cadastrar condomínio
+            </a>
+            <a href="cadastro-sindico.html" class="btn btn-outline-secondary bg-white text-body atalho">
+                <i class="bi bi-person-plus"></i> Cadastrar síndico
+            </a>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between">
+            <h2 class="titulo-secao">Condomínios cadastrados</h2>
+            <div class="form-check form-switch small mb-0">
+                <input class="form-check-input" type="checkbox" role="switch" id="mostrar-inativos">
+                <label class="form-check-label" for="mostrar-inativos">Mostrar inativos</label>
+            </div>
+        </div>
+
+        <div id="lista-condominios">
+            <p class="texto-suave">Carregando...</p>
+        </div>
+
+        <!-- Dados de acesso do síndico ao reenviar o link (e-mail simulado) -->
+        <div id="acesso-sindico"></div>
+    </main>
+
+    <script type="module" src="../../scripts/admin/dashboard.js"></script>
+</body>
+</html>

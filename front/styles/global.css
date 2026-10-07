@@ -1,0 +1,128 @@
+/* Estilos compartilhados por todas as telas do Zelus.
+   O Bootstrap é carregado antes deste arquivo; aqui ficam só as cores da marca e os ajustes comuns. */
+
+:root {
+    --zelus-primaria: #1f3a5f;
+    --zelus-primaria-escura: #152a45;
+    --zelus-fundo: #f4f6f9;
+    --zelus-texto-suave: #6c757d;
+    --zelus-borda: #e3e6eb;
+}
+
+body {
+    background-color: var(--zelus-fundo);
+    min-height: 100vh;
+}
+
+/* Telas protegidas ficam ocultas até o auth-guard confirmar o login */
+body[data-protegida] {
+    visibility: hidden;
+}
+
+/* Botão principal com a cor da marca */
+.btn-zelus {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--zelus-primaria);
+    --bs-btn-border-color: var(--zelus-primaria);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--zelus-primaria-escura);
+    --bs-btn-hover-border-color: var(--zelus-primaria-escura);
+    --bs-btn-active-bg: var(--zelus-primaria-escura);
+    --bs-btn-disabled-bg: var(--zelus-primaria);
+    --bs-btn-disabled-border-color: var(--zelus-primaria);
+}
+
+/* ==========================================
+   TELAS DE AUTENTICAÇÃO (cartão centralizado)
+   ========================================== */
+.tela-auth {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+.cartao-auth {
+    width: 100%;
+    max-width: 400px;
+    background: #fff;
+    border: 1px solid var(--zelus-borda);
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    padding: 2rem;
+}
+
+.marca {
+    font-weight: 700;
+    color: var(--zelus-primaria);
+    margin-bottom: 0;
+}
+
+.texto-suave {
+    color: var(--zelus-texto-suave);
+    font-size: 0.875rem;
+}
+
+/* ==========================================
+   TELAS LOGADAS (navbar + conteúdo centralizado)
+   ========================================== */
+.pagina {
+    max-width: 760px;
+}
+
+.conteudo {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+}
+
+.cartao {
+    background: #fff;
+    border: 1px solid var(--zelus-borda);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+}
+
+.titulo-pagina .sobretitulo {
+    display: block;
+    color: var(--zelus-texto-suave);
+    font-size: 0.875rem;
+}
+
+.titulo-secao {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.75rem;
+}
+
+/* Itens de lista (condomínios, unidades, chamados...) */
+.item-lista {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background: #fff;
+    border: 1px solid var(--zelus-borda);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.item-lista.inativo {
+    opacity: 0.6;
+}
+
+.item-lista .acoes {
+    display: flex;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+/* Botões grandes de atalho do dashboard */
+.atalho {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    text-align: left;
+}
