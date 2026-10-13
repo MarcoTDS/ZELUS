@@ -54,7 +54,8 @@ async function carregarUnidades(idCondominio) {
 
 // Exibe a confirmação no lugar do formulário
 function mostrarSucesso(mensagem) {
-    const cartao = form.closest(".cartao-auth");
+    // Cartão do layout novo (.card-body); mantém .cartao-auth como alternativa
+    const cartao = form.closest(".card-body") || form.closest(".cartao-auth");
     cartao.innerHTML = `
         <header class="mb-3">
             <h1 class="h4 mb-1">Solicitação enviada</h1>
@@ -86,7 +87,7 @@ form.addEventListener("submit", async (evento) => {
                 id_unidade: Number(selectUnidade.value)
             }
         });
-        mostrarSucesso(resposta.mensagem);
+        mostrarSucesso(resposta.mensagem || "Cadastro enviado! Aguarde a aprovação do síndico.");
     } catch (erro) {
         // 409: e-mail já cadastrado (RN11) | 404: unidade não encontrada ou inativada
         mostrarAlerta(alerta, erro.message);

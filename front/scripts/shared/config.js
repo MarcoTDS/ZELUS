@@ -5,87 +5,69 @@ export const API_URL = "http://127.0.0.1:8000";
 
 // API pública de consulta de CEP (preenchimento do endereço do condomínio)
 export const VIACEP_URL = "https://viacep.com.br/ws";
-
-// Caminhos das telas, a partir da pasta front/ (raiz do Live Server).
+ 
+// Caminhos das telas, a partir da pasta front/ (raiz do servidor).
 export const ROTAS = {
     login: "/views/auth/login.html",
-    esqueciSenha: "/views/auth/esqueci-senha.html",
     cadastro: "/views/auth/cadastro.html",
     trocarSenha: "/views/auth/trocar-senha.html",
-
-    // Dashboard de cada perfil (RF02, RF03, RF04)
+ 
+    // Dashboard de cada perfil
     inicio: {
         Morador: "/views/morador/dashboard.html",
         Sindico: "/views/sindico/dashboard.html",
         Administrador: "/views/admin/dashboard.html"
     },
-
+ 
     // Administrador
     admin: {
-        condominio: "/views/admin/condominio.html",              // 1.20
-        cadastroSindico: "/views/admin/cadastro-sindico.html"    // 1.21
+        condominio: "/views/admin/cadastro-condominio.html",
+        cadastroSindico: "/views/admin/cadastro-sindico.html"
     },
-
+ 
     // Síndico
     sindico: {
-        worklist: "/views/sindico/worklist.html",                // 1.10
-        historico: "/views/sindico/historico.html",              // 1.16
-        categorias: "/views/sindico/categorias.html",            // 1.12
-        cadastrosPendentes: "/views/sindico/cadastros-pendentes.html", // 1.13
-        moradores: "/views/sindico/moradores.html",              // 1.14
-        unidades: "/views/sindico/unidades.html"                 // 1.15
+        worklist: "/views/sindico/worklist.html",
+        categorias: "/views/sindico/categorias.html",
+        cadastrosPendentes: "/views/sindico/cadastros-pendentes.html"
     },
-
+ 
     // Morador
     morador: {
-        novoChamado: "/views/morador/novo-chamado.html"          // 1.5
+        novoChamado: "/views/morador/novo-chamado.html"
     },
-
+ 
     // Telas compartilhadas entre perfis
     comum: {
-        chamado: "/views/comum/chamado.html",                    // 1.6 / 1.11 (?id=N)
-        mural: "/views/comum/mural.html",                        // 1.7
-        perfil: "/views/comum/perfil.html",                      // 1.8
-        alterarSenha: "/views/comum/alterar-senha.html"          // 1.18
+        chamado: "/views/comum/chamado.html"      // abre com ?id=N
     }
+ 
+    // Fora da pré-banca (voltam aqui quando as telas forem refeitas):
+    // esqueciSenha, sindico.historico, sindico.moradores, sindico.unidades,
+    // comum.mural, comum.perfil, comum.alterarSenha
 };
-
+ 
 // ==========================================
 // MENU DA NAVBAR POR PERFIL
 // ==========================================
-// Cada item é um link { texto, icone, rota } ou um grupo { texto, icone, itens: [...] } (submenu).
+// Cada item é um link { texto, icone, rota } ou um grupo { texto, icone, itens: [...] }.
 // Ícones: nomes do Bootstrap Icons (https://icons.getbootstrap.com).
+// ==========================================
+// MENU DE LINKS NO CABEÇALHO (opcional)
+// ==========================================
+// Na pré-banca o cabeçalho não mostra links: só logo, usuário e tema.
+// Para exibir links ao lado da logo, preencha a lista do perfil. Cada item é
+// { texto, icone, rota } ou um grupo { texto, icone, itens: [...] }.
+// Ícones: nomes do Bootstrap Icons (https://icons.getbootstrap.com).
+// Exemplo:
+//   Sindico: [
+//       { texto: "Início", icone: "bi-house", rota: ROTAS.inicio.Sindico },
+//       { texto: "Fila de chamados", icone: "bi-list-task", rota: ROTAS.sindico.worklist }
+//   ]
 export const MENUS = {
-    Administrador: [
-        { texto: "Condomínios", icone: "bi-buildings", rota: ROTAS.inicio.Administrador },
-        { texto: "Cadastrar condomínio", icone: "bi-building-add", rota: ROTAS.admin.condominio },
-        { texto: "Cadastrar síndico", icone: "bi-person-plus", rota: ROTAS.admin.cadastroSindico }
-    ],
-
-    Sindico: [
-        { texto: "Início", icone: "bi-house", rota: ROTAS.inicio.Sindico },
-        {
-            texto: "Chamados", icone: "bi-tools", itens: [
-                { texto: "Fila de chamados", icone: "bi-list-task", rota: ROTAS.sindico.worklist },
-                { texto: "Histórico", icone: "bi-clock-history", rota: ROTAS.sindico.historico },
-                { texto: "Mural do condomínio", icone: "bi-megaphone", rota: ROTAS.comum.mural }
-            ]
-        },
-        {
-            texto: "Gestão", icone: "bi-gear", itens: [
-                { texto: "Cadastros pendentes", icone: "bi-person-check", rota: ROTAS.sindico.cadastrosPendentes },
-                { texto: "Moradores", icone: "bi-people", rota: ROTAS.sindico.moradores },
-                { texto: "Unidades", icone: "bi-door-closed", rota: ROTAS.sindico.unidades },
-                { texto: "Categorias e SLA", icone: "bi-tags", rota: ROTAS.sindico.categorias }
-            ]
-        }
-    ],
-
-    Morador: [
-        { texto: "Meus chamados", icone: "bi-house", rota: ROTAS.inicio.Morador },
-        { texto: "Novo chamado", icone: "bi-plus-circle", rota: ROTAS.morador.novoChamado },
-        { texto: "Mural", icone: "bi-megaphone", rota: ROTAS.comum.mural }
-    ]
+    Administrador: [],
+    Sindico: [],
+    Morador: []
 };
 
 // Itens do menu do usuário (lado direito da navbar), comuns ou por perfil

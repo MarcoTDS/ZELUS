@@ -1,14 +1,52 @@
 /* Estilos compartilhados por todas as telas do Zelus.
-   O Bootstrap é carregado antes deste arquivo; aqui ficam só as cores da marca e os ajustes comuns. */
+   O Bootstrap é carregado antes deste arquivo; aqui ficam as cores da marca,
+   os componentes usados pelos scripts e o modo escuro (data-bs-theme="dark").
 
+   Organização:
+   1. Variáveis (claro / escuro)
+   2. Base, botões, links e avisos
+   3. Logo animada
+   4. Telas de autenticação
+   5. Telas logadas (cabeçalho, cartões, listas, dashboard)
+   6. Chamados e cadastros pendentes
+   7. Botão de tema
+   8. Ajustes do Bootstrap no modo escuro
+*/
+
+/* ==========================================
+   1. VARIÁVEIS
+   ========================================== */
 :root {
-    --zelus-primaria: #1f3a5f;
-    --zelus-primaria-escura: #152a45;
-    --zelus-fundo: #f4f6f9;
-    --zelus-texto-suave: #6c757d;
+    --zelus-primaria: #7B3FE4;
+    --zelus-primaria-escura: #6a35c9;
+    --zelus-destaque: #7B3FE4;          /* texto/ícone roxo sobre o fundo da página */
+    --zelus-fundo: #f2f2f2;
+    --zelus-card: #ffffff;
     --zelus-borda: #e3e6eb;
+    --zelus-hover: #F1EBFB;
+    --zelus-borda-destaque: #D6C4F6;
+    --zelus-texto-suave: #6c757d;
+    --zelus-vencido: #8B1A1A;
+    --zelus-vencido-fundo: #fdf1f1;
+    --zelus-vencido-borda: #e9b4b4;
 }
 
+[data-bs-theme="dark"] {
+    --zelus-destaque: #B98CF0;
+    --zelus-fundo: #211124;
+    --zelus-card: #2E1834;
+    --zelus-borda: #46264F;
+    --zelus-hover: #3A1F45;
+    --zelus-borda-destaque: #46264F;
+    --zelus-texto-suave: #B79FC7;
+    --zelus-vencido: #FF8A8A;
+    --zelus-vencido-fundo: #3d1a24;
+    --zelus-vencido-borda: #7a2b3a;
+}
+
+/* ==========================================
+   2. BASE, BOTÕES, LINKS E AVISOS
+   ========================================== */
 body {
     background-color: var(--zelus-fundo);
     min-height: 100vh;
@@ -27,14 +65,214 @@ body[data-protegida] {
     --bs-btn-hover-color: #fff;
     --bs-btn-hover-bg: var(--zelus-primaria-escura);
     --bs-btn-hover-border-color: var(--zelus-primaria-escura);
+    --bs-btn-active-color: #fff;
     --bs-btn-active-bg: var(--zelus-primaria-escura);
+    --bs-btn-active-border-color: var(--zelus-primaria-escura);
+    --bs-btn-disabled-color: #fff;
     --bs-btn-disabled-bg: var(--zelus-primaria);
     --bs-btn-disabled-border-color: var(--zelus-primaria);
+    --bs-btn-focus-shadow-rgb: 123, 63, 228;
+}
+
+/* Botão secundário: só o contorno roxo (ex.: + Adicionar, Reenviar link) */
+.btn-outline-zelus {
+    --bs-btn-color: var(--bs-body-color);
+    --bs-btn-bg: transparent;
+    --bs-btn-border-color: var(--zelus-primaria);
+    --bs-btn-hover-color: var(--bs-body-color);
+    --bs-btn-hover-bg: transparent;
+    --bs-btn-hover-border-color: var(--zelus-primaria-escura);
+    --bs-btn-active-color: var(--bs-body-color);
+    --bs-btn-active-bg: transparent;
+    --bs-btn-active-border-color: var(--zelus-primaria-escura);
+    --bs-btn-disabled-color: #6c757d;
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: #B98CF0;
+    --bs-btn-focus-shadow-rgb: 123, 63, 228;
+}
+
+.btn-outline-zelus:hover {
+    box-shadow: inset 0 0 0 1px var(--zelus-primaria-escura);
+}
+
+[data-bs-theme="dark"] .btn-outline-zelus {
+    --bs-btn-border-color: #B98CF0;
+    --bs-btn-hover-border-color: #D9C9E3;
+    --bs-btn-active-border-color: #D9C9E3;
+    --bs-btn-disabled-color: #8A7395;
+    --bs-btn-disabled-border-color: #6B3C7A;
+}
+
+[data-bs-theme="dark"] .btn-outline-zelus:hover {
+    box-shadow: inset 0 0 0 1px #D9C9E3;
+}
+
+a.link-zelus,
+.btn-link.link-zelus {
+    color: var(--zelus-destaque);
+    text-decoration: none;
+}
+
+.btn-link.link-zelus {
+    font-size: 0.875rem;
+}
+
+.btn-link.link-zelus:hover {
+    text-decoration: underline;
+}
+
+/* Texto em roxo fora de link (ex.: "✓ Visto pelo síndico") */
+p.link-zelus,
+span.link-zelus {
+    color: var(--zelus-destaque);
+}
+
+/* Aviso na paleta do Zelus (o texto do #alerta usa também .alert do Bootstrap) */
+.alert-zelus {
+    background: #F1EBFB;
+    border: 1px solid #B98CF0;
+    border-radius: 8px;
+    color: #4B2394;
+    padding: 8px 12px;
+}
+
+[data-bs-theme="dark"] .alert-zelus {
+    background: #3A1F45;
+    border-color: #6B3C7A;
+    color: #D9C9E3;
+}
+
+.texto-suave {
+    color: var(--zelus-texto-suave);
+    font-size: 0.875rem;
+}
+
+/* Switch e foco na cor do Zelus */
+.form-check-input:checked {
+    background-color: var(--zelus-primaria);
+    border-color: var(--zelus-primaria);
+}
+
+.form-check-input:focus,
+.form-control:focus,
+.form-select:focus {
+    border-color: #B98CF0;
+    box-shadow: 0 0 0 0.2rem rgba(123, 63, 228, 0.25);
+}
+
+/* Tabelas dentro dos cartões: sem fundo próprio */
+.card .table,
+.cartao .table {
+    --bs-table-bg: transparent;
+}
+
+/* Campo opcional: não fica verde na validação (ex.: anexo) */
+.was-validated .form-control.sem-check:valid {
+    border-color: var(--bs-border-color);
+    background-image: none;
+    padding-right: 0.75rem;
+}
+
+/* Lista de requisitos da senha (ficam verdes quando cumpridos) */
+.requisitos-senha {
+    list-style: none;
+    padding-left: 0;
+    color: var(--zelus-texto-suave);
+}
+
+.requisitos-senha li::before { content: "○ "; }
+.requisitos-senha li.ok { color: #2E9E5B; }
+.requisitos-senha li.ok::before { content: "✓ "; }
+
+[data-bs-theme="dark"] .requisitos-senha li.ok { color: #5CC98A; }
+
+/* ==========================================
+   3. LOGO ANIMADA (engrenagem entre ferramentas)
+   ========================================== */
+.logo-zelus {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 10px;
+    padding: 0;
+    border-radius: 12px;
+    background: var(--zelus-primaria);
+}
+
+.logo-zelus.logo-zelus-sm {
+    width: 36px;
+    height: 36px;
+    margin: 0;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.logo-zelus.logo-zelus-md {
+    width: 52px;
+    height: 52px;
+    margin: 0;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+.figura-zelus {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.ferramentas-zelus,
+.engrenagem-zelus {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.ferramentas-zelus {
+    filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 6px #fff);
+}
+
+.engrenagem-zelus {
+    transform-box: view-box;
+    transform-origin: 50% 50%;
+    animation: girar-engrenagem 10s linear infinite;
+    filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 7px #2E1834);
+}
+
+@keyframes girar-engrenagem {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .engrenagem-zelus { animation: none; }
+}
+
+/* Nome ao lado da logo, no cabeçalho */
+.marca {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--zelus-destaque);
+    margin-bottom: 0;
 }
 
 /* ==========================================
-   TELAS DE AUTENTICAÇÃO (cartão centralizado)
+   4. TELAS DE AUTENTICAÇÃO
    ========================================== */
+body.pagina-login {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 16px;
+}
+
+.card-login {
+    width: 100%;
+    max-width: 380px;
+}
+
+/* Variante sem Bootstrap .card */
 .tela-auth {
     display: flex;
     align-items: center;
@@ -46,29 +284,22 @@ body[data-protegida] {
 .cartao-auth {
     width: 100%;
     max-width: 400px;
-    background: #fff;
+    background: var(--zelus-card);
     border: 1px solid var(--zelus-borda);
     border-radius: 0.75rem;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
     padding: 2rem;
 }
 
-.marca {
-    font-weight: 700;
-    color: var(--zelus-primaria);
-    margin-bottom: 0;
-}
-
-.texto-suave {
-    color: var(--zelus-texto-suave);
-    font-size: 0.875rem;
-}
-
 /* ==========================================
-   TELAS LOGADAS (navbar + conteúdo centralizado)
+   5. TELAS LOGADAS
    ========================================== */
 .pagina {
     max-width: 760px;
+}
+
+.pagina-larga {
+    max-width: 1080px;
 }
 
 .conteudo {
@@ -77,16 +308,19 @@ body[data-protegida] {
 }
 
 .cartao {
-    background: #fff;
+    background: var(--zelus-card);
     border: 1px solid var(--zelus-borda);
     border-radius: 0.75rem;
     padding: 1.5rem;
 }
 
-.titulo-pagina .sobretitulo {
+.titulo-pagina .sobretitulo,
+.rotulo-pagina {
     display: block;
-    color: var(--zelus-texto-suave);
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--zelus-destaque);
+    margin-bottom: 0;
 }
 
 .titulo-secao {
@@ -95,21 +329,22 @@ body[data-protegida] {
     margin: 1.5rem 0 0.75rem;
 }
 
-/* Itens de lista (condomínios, unidades, chamados...) */
+/* Itens de lista (condomínios, categorias, ...) */
 .item-lista {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    background: #fff;
+    background: var(--zelus-card);
     border: 1px solid var(--zelus-borda);
     border-radius: 0.5rem;
     padding: 0.75rem 1rem;
     margin-bottom: 0.5rem;
 }
 
-.item-lista.inativo {
-    opacity: 0.6;
+.item-lista.inativo,
+.item-inativo {
+    opacity: 0.55;
 }
 
 .item-lista .acoes {
@@ -118,20 +353,52 @@ body[data-protegida] {
     flex-shrink: 0;
 }
 
+.item-acoes .btn {
+    white-space: nowrap;
+}
+
 /* Botões grandes de atalho do dashboard */
-.atalho {
+.atalho,
+.btn-atalho {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 10px;
     width: 100%;
+    padding: 10px 14px;
     text-align: left;
+    background: var(--zelus-card);
+    border: 1px solid var(--zelus-borda-destaque);
+    border-radius: 8px;
+    color: var(--bs-body-color);
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.atalho i,
+.atalho svg,
+.btn-atalho i,
+.btn-atalho svg {
+    color: var(--zelus-destaque);
+    flex-shrink: 0;
+}
+
+.atalho:hover,
+.btn-atalho:hover {
+    background: var(--zelus-hover);
+    border-color: var(--zelus-destaque);
+    color: var(--bs-body-color);
+}
+
+.atalho .badge,
+.btn-atalho .badge {
+    font-weight: 600;
 }
 
 /* Quadros do resumo do dashboard (ex.: Abertos, Urgentes) */
 .resumo-item {
     display: block;
     height: 100%;
-    background: #fff;
+    background: var(--zelus-card);
     border: 1px solid var(--zelus-borda);
     border-radius: 0.5rem;
     padding: 0.75rem 1rem;
@@ -140,7 +407,7 @@ body[data-protegida] {
 }
 
 .resumo-item:hover {
-    border-color: var(--zelus-primaria);
+    border-color: var(--zelus-destaque);
 }
 
 .resumo-rotulo {
@@ -166,81 +433,23 @@ body[data-protegida] {
 }
 
 .voltar:hover {
-    color: var(--zelus-primaria);
+    color: var(--zelus-destaque);
 }
 
-/* ==========================================
-   CHAMADOS (worklist, mural, meus chamados)
-   ========================================== */
-.item-chamado {
-    display: block;
-    background: #fff;
-    border: 1px solid var(--zelus-borda);
-    border-left-width: 4px;
-    border-radius: 0.5rem;
-    padding: 0.75rem 1rem;
-    margin-bottom: 0.5rem;
-    color: inherit;
-    text-decoration: none;
+/* ---------- Cabeçalho (navbar) montado pelo layout.js ---------- */
+.zelus-topo {
+    background: var(--zelus-card);
+    border-bottom: 1px solid var(--zelus-borda);
 }
 
-.item-chamado:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.item-chamado .detalhe {
-    color: var(--zelus-texto-suave);
-}
-
-/* RN04: cor conforme a urgência do SLA */
-.item-chamado.urgencia-vencido {
-    background: #fdf1f1;
-    border-color: #e9b4b4;
-    border-left-color: #9b1c1c;
-}
-
-.item-chamado.urgencia-vencido .detalhe {
-    color: #9b1c1c;
-}
-
-.item-chamado.urgencia-alta { border-left-color: #dc3545; }
-.item-chamado.urgencia-media { border-left-color: #f0a020; }
-.item-chamado.urgencia-baixa { border-left-color: #2e9d5b; }
-
-/* Selos de status do chamado */
-.selo-status { font-weight: 600; }
-.status-aberto { background: #7048e8; color: #fff; }
-.status-andamento { background: #f08c00; color: #fff; }
-.status-resolvido { background: #2e9d5b; color: #fff; }
-.status-cancelado { background: #868e96; color: #fff; }
-.status-vencido { background: #9b1c1c; color: #fff; }
-
-/* ==========================================
-   CADASTROS PENDENTES
-   ========================================== */
-.cartao-pendente {
-    background: #fff;
-    border: 1px solid var(--zelus-borda);
-    border-radius: 0.5rem;
-    padding: 0.75rem 1rem;
-    margin-bottom: 0.75rem;
-}
-
-/* RN11: pedido para unidade que já tem responsável */
-.cartao-pendente.com-aviso {
-    background: #fdf1f1;
-    border-color: #e9b4b4;
-}
-
-/* ==========================================
-   NAVBAR COM MENU POR PERFIL
-   ========================================== */
-.pagina-larga {
-    max-width: 1080px;
+#cabecalho .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
 }
 
 #cabecalho .nav-link.active {
-    color: var(--zelus-primaria);
+    color: var(--zelus-destaque);
     font-weight: 600;
 }
 
@@ -255,6 +464,23 @@ body[data-protegida] {
     background: none;
 }
 
+#cabecalho .dropdown-item {
+    padding: 8px 14px;
+}
+
+#cabecalho .dropdown-item i {
+    color: var(--zelus-destaque);
+}
+
+#cabecalho .dropdown-item.text-danger i {
+    color: currentColor;
+}
+
+#cabecalho .dropdown-item:hover,
+#cabecalho .dropdown-item:focus {
+    background: var(--zelus-hover);
+}
+
 /* Botão do usuário: nome e perfil empilhados, seta ao lado */
 #cabecalho .menu-usuario > .dropdown-toggle {
     display: flex;
@@ -267,10 +493,12 @@ body[data-protegida] {
     margin-left: 0;
 }
 
-/* Menu do usuário alinhado pela direita (sem o JS do Bootstrap, o dropdown-menu-end não posiciona sozinho) */
+/* Alinhado pela direita (sem o JS do Bootstrap o dropdown-menu-end não posiciona sozinho) */
 #cabecalho .menu-usuario > .dropdown-menu {
     right: 0;
     left: auto;
+    min-width: 190px;
+    border-radius: 8px;
 }
 
 /* Telas pequenas: menu aberto em lista, submenus sem "flutuar" */
@@ -291,10 +519,223 @@ body[data-protegida] {
         padding-top: 0.5rem;
     }
 
-    /* No celular o menu do usuário abre dentro da lista, sem sobrepor */
     #cabecalho .menu-usuario > .dropdown-menu {
         position: static;
         border: 0;
         box-shadow: none;
     }
 }
+
+/* ==========================================
+   6. CHAMADOS E CADASTROS PENDENTES
+   ========================================== */
+.item-chamado {
+    display: block;
+    background: var(--zelus-card);
+    border: 1px solid var(--zelus-borda);
+    border-left-width: 4px;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    color: inherit;
+    text-decoration: none;
+}
+
+.item-chamado:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.item-chamado .detalhe {
+    color: var(--zelus-texto-suave);
+}
+
+/* RN04: cor conforme a urgência do SLA */
+.item-chamado.urgencia-vencido {
+    background: var(--zelus-vencido-fundo);
+    border-color: var(--zelus-vencido-borda);
+    border-left-color: #9b1c1c;
+}
+
+.item-chamado.urgencia-vencido .detalhe {
+    color: var(--zelus-vencido);
+}
+
+.item-chamado.urgencia-alta  { border-left-color: #D64545; }
+.item-chamado.urgencia-media { border-left-color: #E58A2A; }
+.item-chamado.urgencia-baixa { border-left-color: #2E9E5B; }
+
+/* Chamado vencido em listas que não usam .item-chamado */
+.item-vencido {
+    box-shadow: inset 3px 0 0 var(--zelus-vencido);
+}
+
+/* Selos de status (RN04) */
+.selo-status { font-weight: 600; color: #fff; }
+.status-aberto,    .badge-aberto       { background: #7B3FE4; color: #fff; }
+.status-andamento, .badge-em-andamento { background: #E58A2A; color: #fff; }
+.status-resolvido, .badge-resolvido    { background: #2E9E5B; color: #fff; }
+.status-cancelado, .badge-cancelado    { background: #D64545; color: #fff; }
+.status-vencido,   .badge-vencido      { background: #8B1A1A; color: #fff; }
+
+/* Cadastros pendentes */
+.cartao-pendente {
+    background: var(--zelus-card);
+    border: 1px solid var(--zelus-borda);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+}
+
+/* RN11: pedido para unidade que já tem responsável */
+.cartao-pendente.com-aviso {
+    background: var(--zelus-vencido-fundo);
+    border-color: var(--zelus-vencido-borda);
+}
+
+/* ==========================================
+   7. BOTÃO DE TEMA
+   ========================================== */
+.btn-tema {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Fixo no canto, só na tela de login */
+.pagina-login .btn-tema {
+    position: fixed;
+    top: 0;
+    right: 0;
+    margin: 1rem;
+    z-index: 1050;
+}
+
+[data-bs-theme="light"] .btn-tema,
+[data-bs-theme="light"] .btn-tema:hover,
+[data-bs-theme="light"] .btn-tema:focus,
+[data-bs-theme="light"] .btn-tema:active {
+    background-color: transparent;
+    border-color: var(--zelus-primaria-escura);
+    color: var(--zelus-primaria-escura);
+}
+
+/* ==========================================
+   8. MODO ESCURO — AJUSTES DO BOOTSTRAP
+   ========================================== */
+[data-bs-theme="dark"] .card {
+    --bs-card-bg: #2E1834;
+    --bs-card-border-color: #46264F;
+}
+
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+    background-color: #211124;
+    border-color: #46264F;
+    color: #fff;
+}
+
+[data-bs-theme="dark"] .form-select:disabled {
+    background-color: #2A1630;
+    color: #8A7395;
+}
+
+[data-bs-theme="dark"] .form-control::placeholder {
+    color: #8A7395;
+}
+
+[data-bs-theme="dark"] .text-muted {
+    color: #B79FC7 !important;
+}
+
+[data-bs-theme="dark"] .dropdown-menu {
+    --bs-dropdown-bg: #2E1834;
+    --bs-dropdown-border-color: #46264F;
+    --bs-dropdown-link-hover-bg: #3A1F45;
+    --bs-dropdown-divider-bg: #46264F;
+}
+
+[data-bs-theme="dark"] .list-group {
+    --bs-list-group-bg: #2E1834;
+    --bs-list-group-border-color: #46264F;
+}
+
+[data-bs-theme="dark"] .navbar-toggler {
+    border-color: #46264F;
+}
+
+[data-bs-theme="dark"] .navbar-toggler-icon {
+    filter: invert(1);
+}
+
+/* ==========================================
+   COMPATIBILIDADE COM O estilo.css ORIGINAL
+   (classes usadas nas telas novas, mantidas como estavam)
+   ========================================== */
+.zelus-pagina {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.zelus-content {
+    flex: 1;
+    padding: 2rem;
+}
+
+.logo-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--zelus-primaria);
+    margin: 0 auto 12px;
+}
+
+.zelus-topo .usuario-topo {
+    color: inherit;
+    text-decoration: none;
+    line-height: 1.2;
+}
+
+a.link-zelus:hover {
+    text-decoration: underline;
+}
+
+.menu-usuario .dropdown-item svg {
+    color: var(--zelus-destaque);
+}
+
+.menu-usuario .dropdown-item.text-danger svg {
+    color: currentColor;
+}
+
+/* Nome do usuário no cabeçalho: cor do texto da página (não de link) */
+#cabecalho .menu-usuario > .dropdown-toggle {
+    color: var(--bs-body-color);
+}
+
+/* ==========================================
+   TELA DE VALIDAR E-MAIL (carregando / sucesso / erro)
+   ========================================== */
+.spinner-zelus {
+    color: var(--zelus-primaria);
+}
+
+.icone-estado {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icone-sucesso { background: #E3F6EB; color: #2E9E5B; }
+.icone-erro    { background: #FBE4E4; color: #D64545; }
+
+[data-bs-theme="dark"] .icone-sucesso { background: #1d3a2c; color: #5CC98A; }
+[data-bs-theme="dark"] .icone-erro    { background: #4a2330; color: #FF8A8A; }

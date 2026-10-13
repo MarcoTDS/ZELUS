@@ -8,7 +8,7 @@ from service import token_service, vinculo_service
 from service.email_service import enviar_email
 
 # URL do front-end usada nos links enviados por e-mail
-URL_FRONTEND = "http://127.0.0.1:5500"
+URL_FRONTEND = "http://127.0.0.1:5501"
 
 # RNF04: Hash de senha com bcrypt (usado diretamente, pois o passlib 1.7.4 é incompatível com o bcrypt 5.x)
 # Atenção: o bcrypt aceita no máximo 72 bytes de senha

@@ -38,7 +38,7 @@ function montarItem(condominio) {
     const acoes = condominio.ativo ? `
         <div class="acoes">
             ${reenviar}
-            <a href="condominio.html?id=${condominio.id}" class="btn btn-sm btn-outline-secondary" title="Editar">
+            <a href="cadastro-condominio.html?id=${condominio.id}" class="btn btn-sm btn-outline-secondary" title="Editar">
                 <i class="bi bi-pencil"></i>
             </a>
             <span title="${condominio.pode_inativar ? "Inativar" : motivoBloqueio}">
