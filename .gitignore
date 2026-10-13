@@ -4,3 +4,5 @@ database.py
 env
 
 criar_admin.py
+__pycache__/
+*.pyc
