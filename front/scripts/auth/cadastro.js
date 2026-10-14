@@ -58,7 +58,7 @@ function mostrarSucesso(mensagem) {
     const cartao = form.closest(".card-body") || form.closest(".cartao-auth");
     cartao.innerHTML = `
         <header class="mb-3">
-            <h1 class="h4 mb-1">Solicitação enviada</h1>
+            <h1 class="h4 mb-1">Solicitação Enviada</h1>
         </header>
         <div class="alert alert-success py-2" role="status"></div>
         <a href="login.html" class="btn btn-zelus w-100">Voltar para o login</a>

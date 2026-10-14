@@ -592,6 +592,44 @@ body.pagina-login {
     border-color: var(--zelus-vencido-borda);
 }
 
+/* Botões dos cartões (o JS usa classes do Bootstrap): Aprovar roxo, Rejeitar vermelho, ambos só contorno */
+.cartao-pendente .btn {
+    background-color: transparent !important;
+}
+
+.cartao-pendente .btn[data-acao="aprovar"] {
+    --bs-btn-color: var(--zelus-primaria);
+    --bs-btn-border-color: var(--zelus-primaria);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--zelus-primaria);
+    --bs-btn-hover-border-color: var(--zelus-primaria);
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--zelus-primaria-escura);
+    --bs-btn-active-border-color: var(--zelus-primaria-escura);
+    --bs-btn-disabled-color: var(--zelus-primaria);
+    --bs-btn-disabled-border-color: var(--zelus-primaria);
+}
+
+.cartao-pendente .btn[data-acao="aprovar"]:hover {
+    background-color: var(--zelus-primaria) !important;
+    color: #fff !important;
+}
+
+.cartao-pendente .btn[data-acao="rejeitar"]:hover {
+    background-color: var(--bs-danger) !important;
+    color: #fff !important;
+}
+
+[data-bs-theme="dark"] .cartao-pendente .btn[data-acao="aprovar"] {
+    --bs-btn-color: var(--zelus-destaque);
+    --bs-btn-border-color: var(--zelus-destaque);
+}
+
+[data-bs-theme="dark"] .cartao-pendente .btn[data-acao="rejeitar"] {
+    --bs-btn-color: #FF8A8A;
+    --bs-btn-border-color: #FF8A8A;
+}
+
 /* ==========================================
    7. BOTÃO DE TEMA
    ========================================== */
@@ -739,3 +777,25 @@ a.link-zelus:hover {
 
 [data-bs-theme="dark"] .icone-sucesso { background: #1d3a2c; color: #5CC98A; }
 [data-bs-theme="dark"] .icone-erro    { background: #4a2330; color: #FF8A8A; }
+
+/* Quadros do resumo do dashboard do síndico (Abertos, Urgentes, Vencidos) */
+.card-resumo {
+    height: 100%;
+    background: var(--zelus-card);
+    border: 1px solid var(--zelus-borda);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+}
+
+.card-resumo-rotulo {
+    margin: 0;
+    color: var(--zelus-texto-suave);
+    font-size: 0.875rem;
+}
+
+.card-resumo-numero {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+}

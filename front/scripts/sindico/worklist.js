@@ -42,8 +42,8 @@ async function carregarChamados() {
         if (chamados.length) {
             lista.innerHTML = chamados.map(montarItem).join("");
         } else if (ticket || filtroStatus.value) {
-            lista.innerHTML = `<p class="texto-suave">Nenhum chamado em aberto encontrado com esse filtro.
-                Chamados resolvidos ou cancelados ficam no <a href="${ROTAS.sindico.historico}">Histórico</a>.</p>`;
+            // O link para o Histórico volta quando essa tela existir (fora da pré-banca)
+            lista.innerHTML = `<p class="texto-suave">Nenhum chamado em aberto encontrado com esse filtro.</p>`;
         } else {
             lista.innerHTML = `<p class="texto-suave">Nenhum chamado em aberto no momento.</p>`;
         }
