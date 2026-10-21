@@ -1,7 +1,9 @@
 // Configurações compartilhadas por todas as telas do Zelus.
 
-// Endereço da API (uvicorn). Em produção, troque pelo domínio do servidor.
-export const API_URL = "http://127.0.0.1:8000";
+// Endereço da API. Rodando local (Live Server), aponta para o uvicorn na porta 8000;
+// no servidor, o Nginx entrega a API no mesmo domínio, em /api.
+const LOCAL = ["127.0.0.1", "localhost"].includes(window.location.hostname);
+export const API_URL = LOCAL ? "http://127.0.0.1:8000" : "/api";
 
 // API pública de consulta de CEP (preenchimento do endereço do condomínio)
 export const VIACEP_URL = "https://viacep.com.br/ws";
