@@ -2,6 +2,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base
@@ -37,12 +38,13 @@ app = FastAPI(
 # 5. CORS: permite que o front-end (HTML/CSS/JS) em outra porta consuma a API (RNF02)
 app.add_middleware(
     CORSMiddleware,
+    # Origens extras (ex.: o domínio de produção) vêm do .env em ZELUS_CORS_ORIGINS, separadas por vírgula
     allow_origins=[
         "http://127.0.0.1:5500",
         "http://localhost:5500",
         "http://127.0.0.1:5501",
         "http://localhost:5501",
-    ],
+    ] + [origem.strip() for origem in os.getenv("ZELUS_CORS_ORIGINS", "").split(",") if origem.strip()],
     allow_methods=["*"],
     allow_headers=["*"],
 )
