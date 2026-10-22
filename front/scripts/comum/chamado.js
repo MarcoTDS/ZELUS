@@ -65,6 +65,7 @@ function statusExibido(chamado) {
 
 function formatarDuracao(ms) {
     const minutos = Math.floor(Math.abs(ms) / 60000);
+    console.log(minutos);
     if (minutos < 60) return `${minutos} min`;
     const horas = Math.floor(minutos / 60);
     if (horas < 24) return `${horas}h`;
@@ -78,6 +79,7 @@ function textoPrazo(chamado) {
         return chamado.concluido_no_prazo ? "Concluído dentro do prazo" : "Concluído fora do prazo";
     }
     const restante = new Date(chamado.data_vencimento) - new Date();
+    console.log(formatarDuracao(restante));
     return restante > 0 ? `Expira em ${formatarDuracao(restante)}` : `Vencido há ${formatarDuracao(restante)}`;
 }
 

@@ -1,4 +1,5 @@
 // 1.14 Tela Gerenciamento de Moradores (RF21, RN08)
+// "Inativar" só bloqueia o acesso do morador; "Remover da unidade" (× ao lado da unidade) encerra o vínculo.
 import { api } from "../shared/api.js";
 import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
@@ -19,14 +20,30 @@ function agruparPorMorador(vinculos) {
     const porId = new Map();
     for (const vinculo of vinculos) {
         const morador = porId.get(vinculo.usuario.id) || { ...vinculo.usuario, unidades: [] };
-        morador.unidades.push(vinculo.unidade.identificacao);
+        morador.unidades.push({ idVinculo: vinculo.id, identificacao: vinculo.unidade.identificacao });
         porId.set(morador.id, morador);
     }
     return [...porId.values()];
 }
 
+function nomesDasUnidades(morador) {
+    return escaparHtml(morador.unidades.map((u) => u.identificacao).join(" · "));
+}
+
+// Cada unidade com o botão × para remover o morador dela
+function montarUnidades(morador) {
+    return morador.unidades.map((unidade) => `
+        <span class="d-inline-flex align-items-center gap-1 me-2">
+            ${escaparHtml(unidade.identificacao)}
+            <button type="button" class="btn btn-link btn-sm p-0 text-danger lh-1" data-acao="remover"
+                    data-id="${morador.id}" data-vinculo="${unidade.idVinculo}"
+                    title="Remover da unidade" aria-label="Remover ${escaparHtml(morador.nome)} da unidade ${escaparHtml(unidade.identificacao)}">
+                <i class="bi bi-x-circle"></i>
+            </button>
+        </span>`).join("");
+}
+
 function montarItem(morador) {
-    const unidades = escaparHtml(morador.unidades.join(" · "));
     const acoes = morador.ativo ? `
         <button type="button" class="btn btn-sm btn-outline-secondary" data-acao="editar" data-id="${morador.id}" title="Editar">
             <i class="bi bi-pencil"></i>
@@ -45,7 +62,7 @@ function montarItem(morador) {
         <div class="item-lista ${morador.ativo ? "" : "inativo"}">
             <div>
                 <div class="fw-semibold">${escaparHtml(morador.nome)}</div>
-                <div class="small texto-suave">${unidades}${morador.ativo ? "" : " · Inativo"}</div>
+                <div class="small texto-suave">${montarUnidades(morador)}${morador.ativo ? "" : "<span>Inativo</span>"}</div>
             </div>
             <div class="acoes">${acoes}</div>
         </div>`;
@@ -68,7 +85,7 @@ function montarFormEdicao(morador) {
                     <div class="invalid-feedback">Informe um e-mail válido.</div>
                 </div>
             </div>
-            <div class="small texto-suave mt-1">${escaparHtml(morador.unidades.join(" · "))}</div>
+            <div class="small texto-suave mt-1">${nomesDasUnidades(morador)}</div>
             <div class="d-flex gap-2 justify-content-end mt-2">
                 <button type="button" class="btn btn-sm btn-outline-secondary" data-acao="cancelar">Cancelar</button>
                 <button type="submit" class="btn btn-sm btn-zelus">Salvar</button>
@@ -112,6 +129,26 @@ async function alterarSituacao(morador, ativar) {
     }
 }
 
+// RF21: encerra o vínculo do morador com a unidade. Sem outra unidade, a API também bloqueia o acesso.
+async function removerDaUnidade(morador, idVinculo) {
+    const unidade = morador.unidades.find((u) => u.idVinculo === idVinculo);
+    const ultima = morador.unidades.length === 1;
+    const aviso = ultima
+        ? "Esta é a única unidade do morador, que sai da lista e o acesso ao sistema será bloqueado."
+        : "O morador continua nas outras unidades.";
+    if (!confirm(`Remover ${morador.nome} da unidade ${unidade.identificacao}?\n\n${aviso}`)) return;
+
+    limparAlerta(alerta);
+    try {
+        const resultado = await api(`/moradores/vinculos/${idVinculo}/remover`, { metodo: "PATCH" });
+        const complemento = resultado.usuario_inativado ? " Sem outra unidade, o acesso ao sistema foi bloqueado." : "";
+        mostrarAlerta(alerta, `Vínculo de ${morador.nome} com a unidade ${unidade.identificacao} removido.${complemento}`, "success");
+        await carregarMoradores();
+    } catch (erro) {
+        mostrarAlerta(alerta, erro.message);
+    }
+}
+
 lista.addEventListener("click", (evento) => {
     const botao = evento.target.closest("[data-acao]");
     if (!botao) return;
@@ -121,6 +158,7 @@ lista.addEventListener("click", (evento) => {
     if (botao.dataset.acao === "cancelar") { emEdicao = null; renderizar(); }
     if (botao.dataset.acao === "inativar") alterarSituacao(morador, false);
     if (botao.dataset.acao === "reativar") alterarSituacao(morador, true);
+    if (botao.dataset.acao === "remover") removerDaUnidade(morador, Number(botao.dataset.vinculo));
 });
 
 lista.addEventListener("submit", async (evento) => {

@@ -25,9 +25,24 @@ function textoSindico(condominio) {
     return `Síndico: ${escaparHtml(condominio.sindico.nome)}${pendente}`;
 }
 
+// Dica exibida na lixeira desabilitada, com o que falta fazer para liberar a inativação (RN15)
+const COMO_LIBERAR = {
+    "o condomínio possui um síndico vinculado": "Desvincule o síndico primeiro.",
+    "o condomínio possui moradores vinculados": "O síndico precisa remover os moradores das unidades (tela Moradores).",
+    "o condomínio possui chamados em aberto": "Os chamados precisam ser resolvidos ou cancelados."
+};
+
 function montarItem(condominio) {
-    // RN15: só pode inativar sem síndico, moradores ou chamados (a API informa em "pode_inativar")
-    const motivoBloqueio = "Não é possível inativar: o condomínio possui síndico, moradores ou chamados.";
+    // RN15: só pode inativar sem síndico, moradores ou chamados em aberto (a API informa em "pode_inativar")
+    const motivo = condominio.motivo_bloqueio || "o condomínio possui vínculos ativos";
+    const motivoBloqueio = `Não é possível inativar: ${motivo}. ${COMO_LIBERAR[motivo] || ""}`.trim();
+    const desvincular = condominio.sindico
+        ? `<button type="button" class="btn btn-sm btn-outline-secondary" data-acao="desvincular"
+                   data-id="${condominio.id}" data-nome="${escaparHtml(condominio.nome)}"
+                   data-sindico="${escaparHtml(condominio.sindico.nome)}" title="Desvincular síndico">
+               <i class="bi bi-person-dash"></i>
+           </button>`
+        : "";
     const reenviar = condominio.sindico && !condominio.sindico.email_validado
         ? `<button type="button" class="btn btn-sm btn-outline-secondary" data-acao="reenviar"
                    data-id-sindico="${condominio.sindico.id}" title="Reenviar link de validação">
@@ -38,6 +53,7 @@ function montarItem(condominio) {
     const acoes = condominio.ativo ? `
         <div class="acoes">
             ${reenviar}
+            ${desvincular}
             <a href="cadastro-condominio.html?id=${condominio.id}" class="btn btn-sm btn-outline-secondary" title="Editar">
                 <i class="bi bi-pencil"></i>
             </a>
@@ -86,6 +102,21 @@ async function inativar(botao) {
     }
 }
 
+// RN07: tira o síndico do condomínio (troca de síndico ou encerramento). O acesso do síndico é bloqueado.
+async function desvincularSindico(botao) {
+    const { id, nome, sindico } = botao.dataset;
+    if (!confirm(`Desvincular ${sindico} do condomínio "${nome}"?\n\nO acesso de ${sindico} ao sistema será bloqueado e o condomínio ficará sem síndico até você cadastrar outro.\n\nSe a ideia é inativar o condomínio, peça antes ao síndico para remover os moradores das unidades e encerrar os chamados em aberto.`)) return;
+
+    limparAlerta(alerta);
+    try {
+        await api(`/admin/condominios/${id}/desvincular-sindico`, { metodo: "PATCH" });
+        mostrarAlerta(alerta, `Síndico desvinculado do condomínio "${nome}" (${sindico}).`, "success");
+        await carregarCondominios();
+    } catch (erro) {
+        mostrarAlerta(alerta, erro.message);
+    }
+}
+
 async function reenviarLink(botao) {
     limparAlerta(alerta);
     definirCarregando(botao, true, "");
@@ -107,6 +138,7 @@ lista.addEventListener("click", (evento) => {
     if (!botao) return;
     if (botao.dataset.acao === "inativar") inativar(botao);
     if (botao.dataset.acao === "reenviar") reenviarLink(botao);
+    if (botao.dataset.acao === "desvincular") desvincularSindico(botao);
 });
 
 mostrarInativos.addEventListener("change", carregarCondominios);

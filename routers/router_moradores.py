@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
 from schemas.usuario import EditarPerfilRequest, UsuarioResponse
-from schemas.vinculo import MoradorResponse
+from schemas.vinculo import MoradorResponse, VinculoRemovidoResponse
 from service import vinculo_service, usuario_service
 from routers.dependencias import get_sindico
 
@@ -36,3 +36,11 @@ def inativar_morador(id_usuario: int, db: Session = Depends(get_db), usuario: di
 def reativar_morador(id_usuario: int, db: Session = Depends(get_db), usuario: dict = Depends(get_sindico)):
     _validar_morador_do_condominio(db, id_usuario, usuario)
     return usuario_service.reativar_usuario(db, id_usuario)
+
+@router_moradores.patch("/vinculos/{id_vinculo}/remover", response_model=VinculoRemovidoResponse, summary="RF21 - Remover Morador da Unidade")
+def remover_morador_da_unidade(id_vinculo: int, db: Session = Depends(get_db), usuario: dict = Depends(get_sindico)):
+    """Encerra o vínculo (id do item da lista de moradores). Sem outra unidade, o morador é inativado."""
+    resultado = vinculo_service.remover_morador_da_unidade(db, id_vinculo, usuario["id_condominio"])
+    if not resultado:
+        raise HTTPException(status_code=404, detail="Vínculo não encontrado.")
+    return resultado

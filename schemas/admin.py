@@ -46,6 +46,7 @@ class CondominioResponse(BaseModel):
     sindico: Optional[SindicoResumo] = None
     ativo: bool
     pode_inativar: Optional[bool] = None # RN15: Calculado na listagem do Administrador
+    motivo_bloqueio: Optional[str] = None # RN15: Por que a lixeira está desabilitada (ex: "o condomínio possui um síndico vinculado")
 
     model_config = ConfigDict(from_attributes=True)
 

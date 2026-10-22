@@ -153,3 +153,30 @@ def listar_moradores(db: Session, id_condominio: int):
         VinculoMoradorDB.ativo == True,
         UnidadeDB.id_condominio == id_condominio
     ).order_by(UsuarioDB.nome).all()
+
+def remover_morador_da_unidade(db: Session, id_vinculo: int, id_condominio: int):
+    # RF21: Encerra o vínculo do morador com a unidade (soft delete, RN08).
+    # Sem nenhuma outra unidade, o morador deixa de pertencer ao condomínio e o usuário é inativado.
+    vinculo = db.query(VinculoMoradorDB).join(UnidadeDB).filter(
+        VinculoMoradorDB.id == id_vinculo,
+        VinculoMoradorDB.status_aprovacao == StatusVinculoEnum.Aprovado,
+        VinculoMoradorDB.ativo == True,
+        UnidadeDB.id_condominio == id_condominio # RN14
+    ).first()
+    if not vinculo:
+        return None
+
+    vinculo.ativo = False
+    db.flush()
+
+    outras_unidades = db.query(VinculoMoradorDB).filter(
+        VinculoMoradorDB.id_usuario == vinculo.id_usuario,
+        VinculoMoradorDB.status_aprovacao != StatusVinculoEnum.Rejeitado,
+        VinculoMoradorDB.ativo == True
+    ).count()
+    usuario_inativado = outras_unidades == 0
+    if usuario_inativado:
+        vinculo.usuario.ativo = False
+
+    db.commit()
+    return {"id": vinculo.id, "usuario_inativado": usuario_inativado}

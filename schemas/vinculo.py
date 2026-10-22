@@ -36,6 +36,11 @@ class MoradorResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class VinculoRemovidoResponse(BaseModel):
+    # RF21: "Remover da unidade" na Tela de Moradores
+    id: int
+    usuario_inativado: bool # True quando o morador não tinha outra unidade (o acesso dele foi bloqueado)
+
 class CadastroMoradorResponse(BaseModel):
     # RF05, RF06: Resposta da Tela de Cadastro
     usuario: UsuarioResponse
