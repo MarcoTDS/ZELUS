@@ -3,6 +3,7 @@ import { api, sessao } from "../shared/api.js";
 import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
 import { ROTAS } from "../shared/config.js";
+import { atualizarPeriodicamente } from "../shared/atualizacao.js";
 import { mostrarAlerta, limparAlerta, mostrarAvisoPendente, definirCarregando } from "../shared/ui.js";
 
 const usuario = await protegerPagina({ perfis: ["Sindico"] });
@@ -59,3 +60,6 @@ const falha = resultados.find((resultado) => resultado.status === "rejected");
 if (falha) {
     mostrarAlerta(alerta, falha.reason.message);
 }
+
+// Novos chamados e cadastros aparecem sem recarregar a página
+atualizarPeriodicamente(() => Promise.all([carregarResumo(), carregarPendentes()]));

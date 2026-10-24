@@ -4,6 +4,7 @@ import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
 import { mostrarAlerta, limparAlerta, mostrarAvisoPendente, escaparHtml, definirCarregando } from "../shared/ui.js";
 import { mostrarAcessoSindico } from "./acesso-sindico.js";
+import { atualizarPeriodicamente } from "../shared/atualizacao.js";
 
 const usuario = await protegerPagina({ perfis: ["Administrador"] });
 montarCabecalho(usuario);
@@ -77,13 +78,14 @@ function montarItem(condominio) {
         </div>`;
 }
 
-async function carregarCondominios() {
+async function carregarCondominios({ silencioso = false } = {}) {
     try {
         const condominios = await api(`/admin/condominios?incluir_inativos=${mostrarInativos.checked}`);
         lista.innerHTML = condominios.length
             ? condominios.map(montarItem).join("")
             : `<p class="texto-suave">Nenhum condomínio cadastrado. Comece em "Cadastrar condomínio".</p>`;
     } catch (erro) {
+        if (silencioso) throw erro;
         lista.innerHTML = "";
         mostrarAlerta(alerta, erro.message);
     }
@@ -141,6 +143,13 @@ lista.addEventListener("click", (evento) => {
     if (botao.dataset.acao === "desvincular") desvincularSindico(botao);
 });
 
-mostrarInativos.addEventListener("change", carregarCondominios);
+mostrarInativos.addEventListener("change", () => carregarCondominios());
 
 carregarCondominios();
+
+// Validação do e-mail do síndico, saída do síndico e o que bloqueia a inativação (RN15)
+// aparecem sem recarregar a página. Pausa enquanto uma ação ainda está em andamento.
+atualizarPeriodicamente(async () => {
+    if (lista.querySelector(".spinner-border")) return;
+    await carregarCondominios({ silencioso: true });
+});

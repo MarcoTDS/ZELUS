@@ -4,6 +4,7 @@ import { api } from "../shared/api.js";
 import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
 import { ROTAS } from "../shared/config.js";
+import { atualizarPeriodicamente } from "../shared/atualizacao.js";
 import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml } from "../shared/ui.js";
 
 const usuario = await protegerPagina({ perfis: ["Sindico"] });
@@ -103,11 +104,12 @@ function renderizar() {
     if (emEdicao) document.getElementById("editar-nome").focus();
 }
 
-async function carregarMoradores() {
+async function carregarMoradores({ silencioso = false } = {}) {
     try {
         moradores = agruparPorMorador(await api("/moradores/"));
         renderizar();
     } catch (erro) {
+        if (silencioso) throw erro;
         lista.innerHTML = "";
         mostrarAlerta(alerta, erro.message);
     }
@@ -185,3 +187,10 @@ lista.addEventListener("submit", async (evento) => {
 });
 
 await carregarMoradores();
+
+// Moradores aprovados em "Cadastros pendentes" aparecem sem recarregar a página.
+// Pausa enquanto um morador está em edição ou uma ação ainda está em andamento.
+atualizarPeriodicamente(async () => {
+    if (emEdicao || lista.querySelector(".spinner-border")) return;
+    await carregarMoradores({ silencioso: true });
+});

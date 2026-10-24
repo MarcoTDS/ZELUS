@@ -4,8 +4,9 @@ import { api } from "../shared/api.js";
 import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
 import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml } from "../shared/ui.js";
-import { formatarDataHora } from "../shared/formatos.js";
+import { formatarDataHora, descreverPrazo, lerDataApi } from "../shared/formatos.js";
 import { ROTAS } from "../shared/config.js";
+import { atualizarPeriodicamente } from "../shared/atualizacao.js";
 
 const usuario = await protegerPagina({ perfis: ["Morador", "Sindico"] });
 montarCabecalho(usuario);
@@ -59,18 +60,10 @@ function finalizado(status) {
 }
 
 // RN04: aberto com prazo estourado aparece como "Vencido"
+// (compara com o relógio do navegador, o mesmo usado no texto do prazo, para os dois nunca divergirem)
 function statusExibido(chamado) {
-    return !finalizado(chamado.status) && chamado.vencido ? "Vencido" : chamado.status;
-}
-
-function formatarDuracao(ms) {
-    const minutos = Math.floor(Math.abs(ms) / 60000);
-    console.log(minutos);
-    if (minutos < 60) return `${minutos} min`;
-    const horas = Math.floor(minutos / 60);
-    if (horas < 24) return `${horas}h`;
-    const dias = Math.floor(horas / 24);
-    return dias === 1 ? "1 dia" : `${dias} dias`;
+    const vencido = chamado.vencido || lerDataApi(chamado.data_vencimento) < new Date();
+    return !finalizado(chamado.status) && vencido ? "Vencido" : chamado.status;
 }
 
 function textoPrazo(chamado) {
@@ -78,9 +71,8 @@ function textoPrazo(chamado) {
         if (chamado.concluido_no_prazo === null || chamado.concluido_no_prazo === undefined) return "Finalizado";
         return chamado.concluido_no_prazo ? "Concluído dentro do prazo" : "Concluído fora do prazo";
     }
-    const restante = new Date(chamado.data_vencimento) - new Date();
-    console.log(formatarDuracao(restante));
-    return restante > 0 ? `Expira em ${formatarDuracao(restante)}` : `Vencido há ${formatarDuracao(restante)}`;
+    // Mesmo texto da fila do síndico (formatos.js), em horas e minutos
+    return descreverPrazo(chamado.data_vencimento);
 }
 
 // ==========================================
@@ -210,4 +202,17 @@ form.addEventListener("submit", async (evento) => {
 
 novoStatus.addEventListener("change", () => novoStatus.setCustomValidity(""));
 
-await carregarChamado();
+// O síndico está preenchendo a mudança de status: não sobrescreve o que ele escolheu/digitou
+function editandoStatus() {
+    return ehSindico && chamadoAtual && (
+        btnSalvar.disabled || novoStatus.value !== chamadoAtual.status || observacao.value.trim() !== ""
+    );
+}
+
+if (await carregarChamado()) {
+    // Status, histórico, "Visto" e prazo se atualizam sem recarregar a página
+    atualizarPeriodicamente(async () => {
+        if (editandoStatus()) return;
+        preencherTela(await api(`/chamados/${encodeURIComponent(idChamado)}`));
+    });
+}

@@ -4,6 +4,8 @@ import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
 import { mostrarAlerta, escaparHtml } from "../shared/ui.js";
 import { ROTAS } from "../shared/config.js";
+import { lerDataApi } from "../shared/formatos.js";
+import { atualizarPeriodicamente } from "../shared/atualizacao.js";
 
 const usuario = await protegerPagina({ perfis: ["Morador"] });
 montarCabecalho(usuario);
@@ -36,7 +38,7 @@ function finalizado(status) {
 }
 
 function formatarData(texto) {
-    return new Date(texto).toLocaleDateString("pt-BR");
+    return lerDataApi(texto).toLocaleDateString("pt-BR");
 }
 
 // RN04: a cor da lateral vem da urgência calculada pelo back (None se finalizado)
@@ -81,16 +83,20 @@ campoBusca.addEventListener("input", () => {
     if (!campoBusca.value) desenharLista();
 });
 
-async function carregarChamados() {
+async function carregarChamados({ silencioso = false } = {}) {
     try {
         chamados = await api("/chamados/meus");
         const emAberto = chamados.filter((c) => !finalizado(c.status)).length;
         document.getElementById("resumo-lista").textContent = chamados.length ? `${emAberto} em aberto` : "";
         desenharLista();
     } catch (erro) {
+        if (silencioso) throw erro;
         lista.innerHTML = "";
         mostrarAlerta(alerta, erro.message);
     }
 }
 
 await carregarChamados();
+
+// Mudanças de status feitas pelo síndico aparecem sem recarregar a página (mantém a busca digitada)
+atualizarPeriodicamente(() => carregarChamados({ silencioso: true }));

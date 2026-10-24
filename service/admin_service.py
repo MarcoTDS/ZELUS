@@ -173,6 +173,24 @@ def _enviar_acesso_sindico(db: Session, sindico: UsuarioDB, condominio_nome: str
         "email_enviado": email_enviado
     }
 
+def _reaproveitar_ex_sindico(db: Session, usuario: UsuarioDB, nome: str):
+    # Um ex-síndico (desvinculado e sem condomínio) pode assumir outro condomínio com a mesma conta.
+    # Cada usuário tem um único perfil: um morador que vira síndico recebe uma conta de síndico com outro e-mail.
+    if usuario.perfil == PerfilUsuarioEnum.Morador:
+        raise HTTPException(status_code=409, detail="Este e-mail pertence a uma conta de morador. Para o morador assumir como síndico, cadastre-o com outro e-mail (a conta de morador continua valendo para abrir chamados).")
+    if usuario.perfil != PerfilUsuarioEnum.Sindico:
+        raise HTTPException(status_code=409, detail="Já existe um usuário cadastrado com este e-mail.")
+
+    # RN07: cada síndico gerencia exatamente um condomínio
+    if db.query(CondominioDB).filter(CondominioDB.id_sindico == usuario.id, CondominioDB.ativo == True).first():
+        raise HTTPException(status_code=409, detail="Este síndico já é responsável por outro condomínio.")
+
+    # Volta a ter acesso, com nova senha provisória e novo link de validação (RN12, RN13)
+    usuario.nome = nome
+    usuario.ativo = True
+    usuario.email_validado = False
+    return usuario
+
 def cadastrar_sindico(db: Session, dados: SindicoCreate):
     condominio = buscar_condominio(db, dados.id_condominio)
     if not condominio:
@@ -182,22 +200,23 @@ def cadastrar_sindico(db: Session, dados: SindicoCreate):
     if condominio.id_sindico is not None:
         raise HTTPException(status_code=409, detail="Este condomínio já possui um síndico responsável.")
 
-    if obter_usuario_por_email(db, dados.email):
-        raise HTTPException(status_code=409, detail="Já existe um usuário cadastrado com este e-mail.")
+    existente = obter_usuario_por_email(db, dados.email)
+    if existente:
+        sindico = _reaproveitar_ex_sindico(db, existente, dados.nome)
+    else:
+        sindico = UsuarioDB(
+            nome=dados.nome,
+            email=dados.email,
+            senha="", # Definida em _enviar_acesso_sindico
+            perfil=PerfilUsuarioEnum.Sindico,
+            email_validado=False # RN12
+        )
+        db.add(sindico)
+        db.flush()
 
-    novo_sindico = UsuarioDB(
-        nome=dados.nome,
-        email=dados.email,
-        senha="", # Definida em _enviar_acesso_sindico
-        perfil=PerfilUsuarioEnum.Sindico,
-        email_validado=False # RN12
-    )
-    db.add(novo_sindico)
-    db.flush()
+    condominio.id_sindico = sindico.id
 
-    condominio.id_sindico = novo_sindico.id
-
-    resultado = _enviar_acesso_sindico(db, novo_sindico, condominio.nome)
+    resultado = _enviar_acesso_sindico(db, sindico, condominio.nome)
     resultado["id_condominio"] = condominio.id
     return resultado
 

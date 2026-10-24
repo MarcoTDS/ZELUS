@@ -4,6 +4,7 @@ import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
 import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml } from "../shared/ui.js";
 import { formatarDataHora } from "../shared/formatos.js";
+import { atualizarPeriodicamente } from "../shared/atualizacao.js";
 
 const usuario = await protegerPagina({ perfis: ["Sindico"] });
 montarCabecalho(usuario);
@@ -12,6 +13,7 @@ const alerta = document.getElementById("alerta");
 const lista = document.getElementById("lista-pendentes");
 
 let pendentes = [];
+let avaliando = false; // evita redesenhar a lista no meio de uma aprovação/rejeição
 
 const LISTA_VAZIA = `<p class="texto-suave">Nenhum cadastro aguardando aprovação.</p>`;
 
@@ -48,11 +50,12 @@ function renderizar() {
     lista.innerHTML = pendentes.length ? pendentes.map(montarCartao).join("") : LISTA_VAZIA;
 }
 
-async function carregarPendentes() {
+async function carregarPendentes({ silencioso = false } = {}) {
     try {
         pendentes = await api("/vinculos/pendentes");
         renderizar();
     } catch (erro) {
+        if (silencioso) throw erro;
         lista.innerHTML = "";
         mostrarAlerta(alerta, erro.message);
     }
@@ -66,6 +69,7 @@ async function avaliar(botao, aprovado) {
     if (!aprovado && !confirm(`Rejeitar o cadastro de ${nome} na unidade ${vinculo.unidade.identificacao}?`)) return;
 
     limparAlerta(alerta);
+    avaliando = true;
     definirCarregando(botao, true, aprovado ? "Aprovando..." : "Rejeitando...");
     cartao.querySelectorAll("button").forEach((b) => { b.disabled = true; });
     try {
@@ -78,6 +82,8 @@ async function avaliar(botao, aprovado) {
     } catch (erro) {
         mostrarAlerta(alerta, erro.message);
         await carregarPendentes();
+    } finally {
+        avaliando = false;
     }
 }
 
@@ -87,3 +93,8 @@ lista.addEventListener("click", (evento) => {
 });
 
 await carregarPendentes();
+
+// Novos pedidos de cadastro aparecem sem recarregar a página
+atualizarPeriodicamente(async () => {
+    if (!avaliando) await carregarPendentes({ silencioso: true });
+});

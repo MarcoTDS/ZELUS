@@ -3,6 +3,7 @@ import { api } from "../shared/api.js";
 import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
 import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml } from "../shared/ui.js";
+import { atualizarPeriodicamente } from "../shared/atualizacao.js";
 
 const usuario = await protegerPagina({ perfis: ["Sindico"] });
 montarCabecalho(usuario);
@@ -105,11 +106,12 @@ function renderizar() {
     if (emEdicao) document.getElementById("editar-campo1").focus();
 }
 
-async function carregarUnidades() {
+async function carregarUnidades({ silencioso = false } = {}) {
     try {
         unidades = await api("/unidades/");
         renderizar();
     } catch (erro) {
+        if (silencioso) throw erro;
         lista.innerHTML = "";
         mostrarAlerta(alerta, erro.message);
     }
@@ -210,3 +212,10 @@ tipoUnidade.addEventListener("change", atualizarCamposNovaUnidade);
 atualizarCamposNovaUnidade();
 
 await carregarUnidades();
+
+// O responsável de cada unidade muda quando o síndico aprova ou remove moradores (RN17).
+// Pausa enquanto uma unidade está em edição ou uma ação ainda está em andamento.
+atualizarPeriodicamente(async () => {
+    if (emEdicao || lista.querySelector(".spinner-border")) return;
+    await carregarUnidades({ silencioso: true });
+});

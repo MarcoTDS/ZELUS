@@ -3,6 +3,7 @@ import { api } from "../shared/api.js";
 import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
 import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml } from "../shared/ui.js";
+import { atualizarPeriodicamente } from "../shared/atualizacao.js";
 
 const usuario = await protegerPagina({ perfis: ["Morador"] });
 montarCabecalho(usuario);
@@ -129,3 +130,11 @@ form.addEventListener("submit", async (evento) => {
 });
 
 await recarregar();
+
+// A aprovação ou rejeição do síndico aparece sem recarregar a página.
+// A lista de unidades para solicitar só é refeita se o morador não estiver escolhendo uma.
+atualizarPeriodicamente(async () => {
+    if (document.querySelector(".spinner-border")) return;
+    await carregarVinculos();
+    if (!selectUnidade.value) await carregarUnidadesDisponiveis();
+});
