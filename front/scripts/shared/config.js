@@ -31,12 +31,15 @@ export const ROTAS = {
     sindico: {
         worklist: "/views/sindico/worklist.html",
         categorias: "/views/sindico/categorias.html",
-        cadastrosPendentes: "/views/sindico/cadastros-pendentes.html"
+        cadastrosPendentes: "/views/sindico/cadastros-pendentes.html",
+        moradores: "/views/sindico/moradores.html",
+        unidades: "/views/sindico/unidades.html"
     },
  
     // Morador
     morador: {
-        novoChamado: "/views/morador/novo-chamado.html"
+        novoChamado: "/views/morador/novo-chamado.html",
+        unidades: "/views/morador/unidades.html"
     },
  
     // Telas compartilhadas entre perfis
@@ -45,7 +48,7 @@ export const ROTAS = {
     }
  
     // Fora da pré-banca (voltam aqui quando as telas forem refeitas):
-    // esqueciSenha, sindico.historico, sindico.moradores, sindico.unidades,
+    // esqueciSenha, sindico.historico,
     // comum.mural, comum.perfil, comum.alterarSenha
 };
  

@@ -261,6 +261,34 @@ span.link-zelus {
 /* ==========================================
    4. TELAS DE AUTENTICAÇÃO
    ========================================== */
+/* Página inicial (index.html, antes do login) */
+.inicio-destaque {
+    padding: 3.5rem 0 2.5rem;
+}
+
+.inicio-destaque .lead {
+    max-width: 640px;
+}
+
+/* Cadastro: lista de unidades com caixas de seleção (RF06) */
+.lista-unidades-cadastro {
+    max-height: 180px;
+    overflow-y: auto;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--zelus-borda);
+    border-radius: 0.375rem;
+    background: var(--zelus-card);
+}
+
+/* As caixas não são "required": evita o verde de campo válido do Bootstrap */
+.was-validated .lista-unidades-cadastro .form-check-input:valid ~ .form-check-label {
+    color: inherit;
+}
+
+.was-validated .lista-unidades-cadastro .form-check-input:valid:not(:checked) {
+    border-color: var(--bs-border-color);
+}
+
 body.pagina-login {
     min-height: 100vh;
     min-height: 100dvh;

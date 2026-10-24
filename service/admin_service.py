@@ -220,6 +220,20 @@ def desvincular_sindico(db: Session, id_condominio: int):
     db.refresh(condominio)
     return condominio
 
+def sindico_sair_do_condominio(db: Session, id_condominio: int):
+    # RN18: O próprio síndico pode deixar o condomínio, desde que não haja chamados Aberto ou Em Andamento.
+    # O condomínio fica sem síndico até o administrador cadastrar outro (RF13).
+    em_aberto = db.query(ChamadoDB).join(UnidadeDB, ChamadoDB.id_unidade_destino == UnidadeDB.id).filter(
+        UnidadeDB.id_condominio == id_condominio,
+        ChamadoDB.status.in_([StatusChamadoEnum.Aberto, StatusChamadoEnum.Em_Andamento])
+    ).count()
+    if em_aberto:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Não é possível sair do condomínio: há {em_aberto} chamado(s) Aberto ou Em Andamento. Resolva ou cancele antes."
+        )
+    return desvincular_sindico(db, id_condominio)
+
 def reenviar_link_validacao(db: Session, id_usuario: int):
     sindico = db.query(UsuarioDB).filter(
         UsuarioDB.id == id_usuario,

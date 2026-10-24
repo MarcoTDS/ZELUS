@@ -8,8 +8,8 @@ from schemas.usuario import (LoginRequest, LoginResponse, UsuarioLogadoResponse,
                              ValidarEmailRequest, MensagemResponse)
 from schemas.unidade import UnidadeResumo
 from schemas.vinculo import CadastroMoradorResponse
-from service import usuario_service, auth_service, vinculo_service
-from routers.dependencias import get_usuario_autenticado, get_usuario_atual
+from service import usuario_service, auth_service, vinculo_service, admin_service
+from routers.dependencias import get_usuario_autenticado, get_usuario_atual, get_sindico
 
 router_auth = APIRouter(prefix="/auth", tags=["Autenticação & Perfil"])
 
@@ -36,12 +36,12 @@ def login(credenciais: LoginRequest, db: Session = Depends(get_db)):
 
 @router_auth.post("/cadastro", response_model=CadastroMoradorResponse, status_code=status.HTTP_201_CREATED, summary="RF05/RF06 - Cadastro do Morador")
 def cadastrar_morador(dados: CadastroMoradorRequest, db: Session = Depends(get_db)):
-    """RF05, RF06, RN11 - Cria o morador e a solicitação de vínculo, pendente até a aprovação do síndico."""
+    """RF05, RF06, RN11 - Cria o morador e uma solicitação de vínculo por unidade, pendentes até a aprovação do síndico."""
     try:
-        usuario, vinculo = usuario_service.cadastrar_morador(db, dados)
+        usuario, vinculos = usuario_service.cadastrar_morador(db, dados)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
-    return {"usuario": usuario, "vinculo": vinculo}
+    return {"usuario": usuario, "vinculos": vinculos}
 
 @router_auth.post("/validar-email", response_model=MensagemResponse, summary="RN12 - Validação do e-mail do síndico")
 def validar_email(dados: ValidarEmailRequest, db: Session = Depends(get_db)):
@@ -100,3 +100,9 @@ def editar_perfil(
 def listar_minhas_unidades(db: Session = Depends(get_db), usuario_atual: dict = Depends(get_usuario_atual)):
     """Tela Editar Perfil (campo Unidade, somente leitura)."""
     return vinculo_service.listar_unidades_do_morador(db, usuario_atual["id"])
+
+@router_auth.patch("/me/sair-do-condominio", response_model=MensagemResponse, summary="RN07, RN18 - Síndico sai do condomínio")
+def sindico_sair_do_condominio(db: Session = Depends(get_db), usuario_atual: dict = Depends(get_sindico)):
+    """Bloqueado enquanto houver chamados Aberto ou Em Andamento. Depois de sair, o acesso do síndico é encerrado."""
+    admin_service.sindico_sair_do_condominio(db, usuario_atual["id_condominio"])
+    return {"mensagem": "Você saiu do condomínio. O administrador vai cadastrar um novo síndico."}

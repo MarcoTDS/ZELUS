@@ -77,6 +77,11 @@ def criar_solicitacao(db: Session, id_usuario: int, id_unidade: int):
     if unidade.tipo_unidade == TipoUnidadeEnum.Area_Comum:
         raise HTTPException(status_code=400, detail="Não é possível solicitar vínculo com uma área comum.")
 
+    # RF06: O morador pode ter várias unidades, mas todas do mesmo condomínio (RN14)
+    id_condominio_atual = obter_id_condominio_do_morador(db, id_usuario)
+    if id_condominio_atual is not None and id_condominio_atual != unidade.id_condominio:
+        raise HTTPException(status_code=400, detail="Todas as unidades devem ser do mesmo condomínio.")
+
     # O banco permite apenas um vínculo ativo por morador/unidade (índice uq_usuario_unidade_ativo)
     vinculo_existente = db.query(VinculoMoradorDB).filter(
         VinculoMoradorDB.id_usuario == id_usuario,
@@ -105,6 +110,32 @@ def solicitar_vinculo(db: Session, id_usuario: int, dados: VinculoCreate):
     db.commit()
     db.refresh(novo_vinculo)
     return novo_vinculo
+
+def listar_vinculos_do_morador(db: Session, id_usuario: int):
+    # Tela "Minhas unidades": unidades aprovadas, pendentes e rejeitadas do próprio morador
+    return db.query(VinculoMoradorDB).filter(
+        VinculoMoradorDB.id_usuario == id_usuario,
+        VinculoMoradorDB.ativo == True
+    ).order_by(VinculoMoradorDB.data_solicitacao).all()
+
+def encerrar_vinculo_do_morador(db: Session, id_vinculo: int, id_usuario: int):
+    # Morador sai de uma unidade ou cancela uma solicitação (soft delete, RN08)
+    vinculo = db.query(VinculoMoradorDB).filter(
+        VinculoMoradorDB.id == id_vinculo,
+        VinculoMoradorDB.id_usuario == id_usuario,
+        VinculoMoradorDB.ativo == True
+    ).first()
+    if not vinculo:
+        return None
+
+    # A última unidade aprovada mantém o acesso do morador; a saída do condomínio é feita pelo síndico (RF21)
+    if vinculo.status_aprovacao == StatusVinculoEnum.Aprovado and len(listar_unidades_do_morador(db, id_usuario)) <= 1:
+        raise HTTPException(status_code=400, detail="Esta é a sua única unidade aprovada. Para deixar o condomínio, procure o síndico.")
+
+    vinculo.ativo = False
+    db.commit()
+    db.refresh(vinculo)
+    return vinculo
 
 def listar_pendentes(db: Session, id_condominio: int):
     # RF11: Vínculos pendentes das unidades do condomínio do síndico

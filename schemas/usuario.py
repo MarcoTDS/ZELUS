@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 from models.enums import PerfilUsuarioEnum
 
 # O bcrypt aceita no máximo 72 bytes de senha
@@ -27,11 +27,11 @@ class UsuarioCreate(UsuarioBase):
     senha: str = Field(..., min_length=SENHA_MIN, max_length=SENHA_MAX, description="Senha em texto plano (será hasheada)")
 
 class CadastroMoradorRequest(BaseModel):
-    # RF05, RF06: Tela de Cadastro (dados do morador + unidade solicitada)
+    # RF05, RF06: Tela de Cadastro (dados do morador + uma ou mais unidades do mesmo condomínio)
     nome: str = Field(..., min_length=3, max_length=150)
     email: EmailStr
     senha: str = Field(..., min_length=SENHA_MIN, max_length=SENHA_MAX)
-    id_unidade: int = Field(..., description="Unidade escolhida no cadastro (fica pendente até a aprovação do síndico)")
+    ids_unidades: List[int] = Field(..., min_length=1, max_length=10, description="Unidades escolhidas no cadastro (cada uma fica pendente até a aprovação do síndico)")
 
 class UsuarioResumo(BaseModel):
     id: int

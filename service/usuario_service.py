@@ -102,17 +102,21 @@ def cadastrar_morador(db: Session, dados: CadastroMoradorRequest):
     db.add(novo_usuario)
     db.flush()
 
-    # RF06: O cadastro fica pendente até a aprovação do síndico (usuário e vínculo na mesma transação)
+    # RF06: Uma solicitação por unidade, pendente até a aprovação do síndico (tudo na mesma transação)
     try:
-        vinculo = vinculo_service.criar_solicitacao(db, novo_usuario.id, dados.id_unidade)
+        vinculos = [
+            vinculo_service.criar_solicitacao(db, novo_usuario.id, id_unidade)
+            for id_unidade in dict.fromkeys(dados.ids_unidades) # ignora unidades repetidas
+        ]
     except Exception:
-        db.rollback() # Unidade inválida: o usuário também não é criado
+        db.rollback() # Alguma unidade inválida: nada é criado
         raise
 
     db.commit()
     db.refresh(novo_usuario)
-    db.refresh(vinculo)
-    return novo_usuario, vinculo
+    for vinculo in vinculos:
+        db.refresh(vinculo)
+    return novo_usuario, vinculos
 
 # ==========================================
 # SENHA (RF15, RF16, RF19, RN13, RN16)

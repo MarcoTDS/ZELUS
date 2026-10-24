@@ -108,13 +108,15 @@
           </select>
         </div>
 
-        <div class="mb-3">
-          <label for="unidade" class="form-label small">Unidade</label>
-          <!-- Fica bloqueado até escolher o condomínio -->
-          <select class="form-select" id="unidade" required disabled>
-            <option selected disabled value="">Escolha o condomínio antes</option>
-          </select>
-        </div>
+        <fieldset class="mb-3">
+          <legend class="form-label small mb-1">Unidade(s)</legend>
+          <!-- Caixas de seleção montadas pelo script depois de escolher o condomínio -->
+          <div class="lista-unidades-cadastro" id="lista-unidades">
+            <p class="small texto-suave mb-0">Escolha o condomínio antes.</p>
+          </div>
+          <div class="form-text">Marque todas as unidades em que você mora ou é responsável.</div>
+          <div class="invalid-feedback d-block" id="erro-unidades" hidden>Selecione ao menos uma unidade.</div>
+        </fieldset>
 
         <div class="alert alert-zelus small mb-3" role="alert">
           Seu cadastro ficará pendente até aprovação do síndico.

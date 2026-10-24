@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 from models.vinculo import StatusVinculoEnum
 from schemas.unidade import UnidadeResumo
 from schemas.usuario import UsuarioResumo, UsuarioResponse
@@ -44,5 +44,5 @@ class VinculoRemovidoResponse(BaseModel):
 class CadastroMoradorResponse(BaseModel):
     # RF05, RF06: Resposta da Tela de Cadastro
     usuario: UsuarioResponse
-    vinculo: VinculoResponse
+    vinculos: List[VinculoResponse] # Uma solicitação por unidade escolhida
     mensagem: str = "Cadastro enviado. Ele ficará pendente até a aprovação do síndico."
