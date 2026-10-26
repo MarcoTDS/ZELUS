@@ -136,6 +136,25 @@ def inativar_condominio(db: Session, id_condominio: int):
     db.refresh(condominio)
     return condominio
 
+def reativar_condominio(db: Session, id_condominio: int):
+    # Desfaz a inativação: o condomínio, as unidades e as categorias dele voltam a ficar ativos.
+    # Só é possível chegar aqui com o condomínio sem síndico nem moradores (RN15), então ele volta
+    # sem síndico até o administrador cadastrar um (RF13). Solicitações rejeitadas na inativação continuam rejeitadas.
+    condominio = db.query(CondominioDB).filter(CondominioDB.id == id_condominio).first()
+    if not condominio:
+        return None
+
+    if condominio.ativo:
+        raise HTTPException(status_code=400, detail="Este condomínio já está ativo.")
+
+    condominio.ativo = True
+    db.query(UnidadeDB).filter(UnidadeDB.id_condominio == condominio.id).update({UnidadeDB.ativo: True})
+    db.query(CategoriaDB).filter(CategoriaDB.id_condominio == condominio.id).update({CategoriaDB.ativo: True})
+
+    db.commit()
+    db.refresh(condominio)
+    return condominio
+
 # ==========================================
 # SÍNDICOS (RF13, RN07, RN12, RN13)
 # ==========================================

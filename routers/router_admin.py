@@ -43,6 +43,14 @@ def inativar_condominio(id_condominio: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Condomínio não encontrado.")
     return condominio
 
+@router_admin.patch("/condominios/{id_condominio}/reativar", response_model=CondominioResponse, summary="Reativar Condomínio")
+def reativar_condominio(id_condominio: int, db: Session = Depends(get_db)):
+    """Desfaz a inativação: reativa o condomínio, as unidades e as categorias dele (volta sem síndico)."""
+    condominio = admin_service.reativar_condominio(db, id_condominio)
+    if not condominio:
+        raise HTTPException(status_code=404, detail="Condomínio não encontrado.")
+    return condominio
+
 @router_admin.patch("/condominios/{id_condominio}/desvincular-sindico", response_model=CondominioResponse, summary="RN07, RN15 - Desvincular Síndico")
 def desvincular_sindico(id_condominio: int, db: Session = Depends(get_db)):
     """Tira o síndico do condomínio e inativa o usuário dele. O condomínio pode receber um novo síndico (RF13)."""

@@ -65,7 +65,14 @@ function montarItem(condominio) {
                     <i class="bi bi-trash"></i>
                 </button>
             </span>
-        </div>` : `<span class="badge text-bg-secondary">Inativo</span>`;
+        </div>` : `
+        <div class="acoes">
+            <span class="badge text-bg-secondary">Inativo</span>
+            <button type="button" class="btn btn-sm btn-outline-success" data-acao="reativar"
+                    data-id="${condominio.id}" data-nome="${escaparHtml(condominio.nome)}" title="Reativar">
+                <i class="bi bi-arrow-counterclockwise"></i>
+            </button>
+        </div>`;
 
     return `
         <div class="item-lista ${condominio.ativo ? "" : "inativo"}">
@@ -104,6 +111,22 @@ async function inativar(botao) {
     }
 }
 
+// Desfaz a inativação: o condomínio, as unidades e as categorias voltam a ficar ativos (sem síndico)
+async function reativar(botao) {
+    if (!confirm(`Reativar o condomínio "${botao.dataset.nome}"?\n\nAs unidades e categorias dele voltam a ficar ativas. O condomínio volta sem síndico: cadastre um novo depois.`)) return;
+
+    limparAlerta(alerta);
+    definirCarregando(botao, true, "");
+    try {
+        await api(`/admin/condominios/${botao.dataset.id}/reativar`, { metodo: "PATCH" });
+        mostrarAlerta(alerta, `Condomínio "${botao.dataset.nome}" reativado.`, "success");
+        await carregarCondominios();
+    } catch (erro) {
+        mostrarAlerta(alerta, erro.message);
+        definirCarregando(botao, false);
+    }
+}
+
 // RN07: tira o síndico do condomínio (troca de síndico ou encerramento). O acesso do síndico é bloqueado.
 async function desvincularSindico(botao) {
     const { id, nome, sindico } = botao.dataset;
@@ -139,6 +162,7 @@ lista.addEventListener("click", (evento) => {
     const botao = evento.target.closest("button[data-acao]");
     if (!botao) return;
     if (botao.dataset.acao === "inativar") inativar(botao);
+    if (botao.dataset.acao === "reativar") reativar(botao);
     if (botao.dataset.acao === "reenviar") reenviarLink(botao);
     if (botao.dataset.acao === "desvincular") desvincularSindico(botao);
 });
