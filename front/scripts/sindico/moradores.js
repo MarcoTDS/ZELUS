@@ -1,5 +1,6 @@
 // 1.14 Tela Gerenciamento de Moradores (RF21, RN08)
-// "Inativar" só bloqueia o acesso do morador; "Remover da unidade" (× ao lado da unidade) encerra o vínculo.
+// "Inativar" só bloqueia o acesso do morador; "Desvincular" (botão da casa) encerra o vínculo com uma unidade:
+// com mais de uma unidade a janela pede para escolher qual; com uma só, a janela pede a confirmação.
 import { api } from "../shared/api.js";
 import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
@@ -31,23 +32,19 @@ function nomesDasUnidades(morador) {
     return escaparHtml(morador.unidades.map((u) => u.identificacao).join(" · "));
 }
 
-// Cada unidade com o botão × para remover o morador dela
+// Unidades do morador (a remoção é feita pelo botão "Desvincular" das ações)
 function montarUnidades(morador) {
-    return morador.unidades.map((unidade) => `
-        <span class="d-inline-flex align-items-center gap-1 me-2">
-            ${escaparHtml(unidade.identificacao)}
-            <button type="button" class="btn btn-link btn-sm p-0 text-danger lh-1" data-acao="remover"
-                    data-id="${morador.id}" data-vinculo="${unidade.idVinculo}"
-                    title="Remover da unidade" aria-label="Remover ${escaparHtml(morador.nome)} da unidade ${escaparHtml(unidade.identificacao)}">
-                <i class="bi bi-x-circle"></i>
-            </button>
-        </span>`).join("");
+    return `<span>${nomesDasUnidades(morador)}</span> `;
 }
 
 function montarItem(morador) {
     const acoes = morador.ativo ? `
         <button type="button" class="btn btn-sm btn-outline-secondary" data-acao="editar" data-id="${morador.id}" title="Editar">
             <i class="bi bi-pencil"></i>
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-danger" data-acao="desvincular" data-id="${morador.id}"
+                title="Desvincular de uma unidade" aria-label="Desvincular ${escaparHtml(morador.nome)} de uma unidade">
+            <i class="bi bi-house-dash"></i>
         </button>
         <button type="button" class="btn btn-sm btn-outline-danger" data-acao="inativar" data-id="${morador.id}" title="Inativar">
             <i class="bi bi-person-x"></i>
@@ -132,13 +129,8 @@ async function alterarSituacao(morador, ativar) {
 }
 
 // RF21: encerra o vínculo do morador com a unidade. Sem outra unidade, a API também bloqueia o acesso.
-async function removerDaUnidade(morador, idVinculo) {
+async function executarRemocao(morador, idVinculo) {
     const unidade = morador.unidades.find((u) => u.idVinculo === idVinculo);
-    const ultima = morador.unidades.length === 1;
-    const aviso = ultima
-        ? "Esta é a única unidade do morador, que sai da lista e o acesso ao sistema será bloqueado."
-        : "O morador continua nas outras unidades.";
-    if (!confirm(`Remover ${morador.nome} da unidade ${unidade.identificacao}?\n\n${aviso}`)) return;
 
     limparAlerta(alerta);
     try {
@@ -151,6 +143,87 @@ async function removerDaUnidade(morador, idVinculo) {
     }
 }
 
+// ==========================================
+// JANELA PARA ESCOLHER A UNIDADE A DESVINCULAR
+// ==========================================
+// Montada uma vez e reaproveitada (fica fora de #lista-moradores para não sumir quando a lista atualiza)
+document.body.insertAdjacentHTML("beforeend", `
+    <div class="modal fade" id="modal-desvincular" tabindex="-1" aria-labelledby="titulo-desvincular" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h2 class="modal-title h5 fw-semibold" id="titulo-desvincular"></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small texto-suave mb-3" id="texto-desvincular"></p>
+                    <div class="list-group" id="opcoes-desvincular"></div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="btn-confirmar-desvincular" disabled>Desvincular</button>
+                </div>
+            </div>
+        </div>
+    </div>`);
+
+const elementoModal = document.getElementById("modal-desvincular");
+const modalDesvincular = new bootstrap.Modal(elementoModal);
+const opcoesDesvincular = document.getElementById("opcoes-desvincular");
+const btnConfirmarDesvincular = document.getElementById("btn-confirmar-desvincular");
+let moradorDoModal = null;
+
+function abrirModalDesvincular(morador) {
+    moradorDoModal = morador.id;
+    const titulo = document.getElementById("titulo-desvincular");
+    const texto = document.getElementById("texto-desvincular");
+
+    if (morador.unidades.length === 1) {
+        // Única unidade: só confirma (o acesso ao sistema também é bloqueado)
+        const unidade = morador.unidades[0];
+        titulo.textContent = "Desvincular morador?";
+        texto.textContent = `Esta é a única unidade de ${morador.nome}. Ao desvincular, ele(a) sai da lista de moradores e o acesso ao sistema será bloqueado.`;
+        opcoesDesvincular.innerHTML = `
+            <div class="list-group-item d-flex align-items-center gap-3">
+                <i class="bi bi-house-door text-danger"></i>
+                <span class="fw-semibold">${escaparHtml(unidade.identificacao)}</span>
+            </div>`;
+        btnConfirmarDesvincular.disabled = false;
+    } else {
+        titulo.textContent = "Desvincular de qual unidade?";
+        texto.textContent = `${morador.nome} continua nas outras unidades. Escolha a unidade da qual ele(a) será removido(a).`;
+        opcoesDesvincular.innerHTML = morador.unidades.map((unidade) => `
+            <label class="list-group-item d-flex align-items-center gap-3" style="cursor: pointer;">
+                <input class="form-check-input mt-0" type="radio" name="unidade-desvincular" value="${unidade.idVinculo}">
+                <span class="fw-semibold">${escaparHtml(unidade.identificacao)}</span>
+            </label>`).join("");
+        btnConfirmarDesvincular.disabled = true;
+    }
+    modalDesvincular.show();
+}
+
+opcoesDesvincular.addEventListener("change", () => { btnConfirmarDesvincular.disabled = false; });
+
+btnConfirmarDesvincular.addEventListener("click", async () => {
+    const morador = moradores.find((m) => m.id === moradorDoModal);
+    if (!morador) return;
+
+    // Uma unidade só: é a própria; senão, a que foi marcada
+    const escolhida = opcoesDesvincular.querySelector("input:checked");
+    const idVinculo = morador.unidades.length === 1 ? morador.unidades[0].idVinculo : Number(escolhida?.value);
+    if (!idVinculo) return;
+
+    modalDesvincular.hide();
+    await executarRemocao(morador, idVinculo);
+});
+
+elementoModal.addEventListener("hidden.bs.modal", () => { moradorDoModal = null; });
+
+// Abre a janela: escolher a unidade (mais de uma) ou confirmar (uma só)
+function desvincular(morador) {
+    abrirModalDesvincular(morador);
+}
+
 lista.addEventListener("click", (evento) => {
     const botao = evento.target.closest("[data-acao]");
     if (!botao) return;
@@ -160,7 +233,7 @@ lista.addEventListener("click", (evento) => {
     if (botao.dataset.acao === "cancelar") { emEdicao = null; renderizar(); }
     if (botao.dataset.acao === "inativar") alterarSituacao(morador, false);
     if (botao.dataset.acao === "reativar") alterarSituacao(morador, true);
-    if (botao.dataset.acao === "remover") removerDaUnidade(morador, Number(botao.dataset.vinculo));
+    if (botao.dataset.acao === "desvincular") desvincular(morador);
 });
 
 lista.addEventListener("submit", async (evento) => {
@@ -191,6 +264,6 @@ await carregarMoradores();
 // Moradores aprovados em "Cadastros pendentes" aparecem sem recarregar a página.
 // Pausa enquanto um morador está em edição ou uma ação ainda está em andamento.
 atualizarPeriodicamente(async () => {
-    if (emEdicao || lista.querySelector(".spinner-border")) return;
+    if (emEdicao || moradorDoModal || lista.querySelector(".spinner-border")) return;
     await carregarMoradores({ silencioso: true });
 });
