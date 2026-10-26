@@ -65,17 +65,27 @@
           <div class="invalid-feedback">Descreva o problema.</div>
         </div>
 
-        <!-- O back-end recebe links (foto_url e video_url), não arquivos -->
-        <div class="row g-2 mb-3">
+        <!-- Anexos (opcionais): 1 foto e 1 vídeo. Sem o atributo "capture", o celular oferece câmera, galeria ou arquivos -->
+        <div class="row g-3 mb-3">
           <div class="col-md-6">
-            <label for="link-foto" class="form-label small">Link da foto (opcional)</label>
-            <input type="url" class="form-control" id="link-foto" maxlength="255" placeholder="https://...">
-            <div class="invalid-feedback">Informe um link válido (começando com http).</div>
+            <label for="arquivo-foto" class="form-label small">Foto (opcional)</label>
+            <input type="file" class="form-control" id="arquivo-foto" accept="image/*">
+            <div class="invalid-feedback" id="erro-foto"></div>
+            <div class="form-text">JPG, PNG ou WEBP, até 5 MB. Fotos grandes são reduzidas antes do envio.</div>
+            <div class="d-none mt-2" id="bloco-previa-foto">
+              <img id="previa-foto" class="anexo-midia" alt="Prévia da foto escolhida">
+              <button type="button" class="btn btn-link link-zelus btn-sm p-0 d-block" id="remover-foto">Remover foto</button>
+            </div>
           </div>
           <div class="col-md-6">
-            <label for="link-video" class="form-label small">Link do vídeo (opcional)</label>
-            <input type="url" class="form-control" id="link-video" maxlength="255" placeholder="https://...">
-            <div class="invalid-feedback">Informe um link válido (começando com http).</div>
+            <label for="arquivo-video" class="form-label small">Vídeo (opcional)</label>
+            <input type="file" class="form-control" id="arquivo-video" accept="video/*">
+            <div class="invalid-feedback" id="erro-video"></div>
+            <div class="form-text">MP4, MOV ou WEBM, até 50 MB (cerca de 30 segundos gravados no celular).</div>
+            <div class="d-none mt-2" id="bloco-previa-video">
+              <video id="previa-video" class="anexo-midia" controls muted playsinline></video>
+              <button type="button" class="btn btn-link link-zelus btn-sm p-0 d-block" id="remover-video">Remover vídeo</button>
+            </div>
           </div>
         </div>
 
@@ -86,6 +96,8 @@
         </div>
 
         <button type="submit" class="btn btn-zelus w-100 mt-2" id="btn-enviar">Enviar Chamado</button>
+        <!-- Aparece só se o chamado foi aberto e o envio de um anexo falhou -->
+        <a href="#" class="link-zelus small d-none d-block text-center mt-3" id="link-pular-anexo">Ir para o chamado sem este anexo</a>
 
       </div>
     </form>

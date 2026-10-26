@@ -11,8 +11,7 @@ class ChamadoCreate(BaseModel):
     descricao: str = Field(..., min_length=3)
     id_categoria: int
     id_unidade_destino: int = Field(..., description="Unidade do morador ou área comum (RN05)")
-    foto_url: Optional[str] = Field(None, max_length=255)
-    video_url: Optional[str] = Field(None, max_length=255)
+    # Foto e vídeo não vêm aqui: são enviados como arquivo em POST /chamados/{id}/anexos/{tipo}
 
 class AutorResumo(BaseModel):
     id: int
@@ -56,7 +55,7 @@ class HistoricoChamadoResponse(BaseModel):
 class ChamadoDetalheResponse(ChamadoResponse):
     # RF18: Tela de detalhe/gerenciamento do chamado
     autor: AutorResumo
-    foto_url: Optional[str] = None
+    foto_url: Optional[str] = None                   # Caminho do arquivo no servidor (ou link, em chamados antigos)
     video_url: Optional[str] = None
     data_visto: Optional[datetime] = None            # RN10
     data_conclusao: Optional[datetime] = None
@@ -81,3 +80,12 @@ class ResumoSindicoResponse(BaseModel):
     abertos: int
     urgentes: int
     vencidos: int
+
+class AnexoEnviadoResponse(BaseModel):
+    tipo: Literal["foto", "video"]
+    tamanho_bytes: int
+
+class AnexoLinkResponse(BaseModel):
+    # Endereço para <img>/<video>; externo=True em chamados antigos que guardavam um link
+    url: str
+    externo: bool

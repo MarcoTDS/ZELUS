@@ -106,8 +106,6 @@ def criar_chamado(db: Session, dados: ChamadoCreate, id_autor: int, id_condomini
         status=StatusChamadoEnum.Aberto,
         titulo=dados.titulo,
         descricao=dados.descricao,
-        foto_url=dados.foto_url,
-        video_url=dados.video_url,
         prazo_sla_vigente=categoria.prazo_sla # RN01: SLA herdado da categoria no momento da abertura
     )
     db.add(novo_chamado)

@@ -5,7 +5,7 @@ import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
 import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml } from "../shared/ui.js";
 import { formatarDataHora, descreverPrazo, lerDataApi } from "../shared/formatos.js";
-import { ROTAS } from "../shared/config.js";
+import { ROTAS, API_URL } from "../shared/config.js";
 import { atualizarPeriodicamente } from "../shared/atualizacao.js";
 
 const usuario = await protegerPagina({ perfis: ["Morador", "Sindico"] });
@@ -51,6 +51,8 @@ const CLASSES_STATUS = {
 };
 
 let chamadoAtual = null;
+// Anexo já exibido de cada tipo: a atualização periódica não baixa a foto/vídeo de novo
+const anexosExibidos = { foto: null, video: null };
 
 // ==========================================
 // AJUDANTES
@@ -85,6 +87,31 @@ function preencherHistorico(itens) {
         </p>
         ${item.observacao ? `<p class="small text-muted mb-2">${escaparHtml(item.observacao)}</p>` : ""}
     `).join("");
+}
+
+// A API devolve um link temporário para o arquivo (ou o link externo, em chamados antigos)
+async function mostrarAnexo(tipo, valor) {
+    $(`anexo-${tipo}`).classList.toggle("d-none", !valor);
+    if (!valor || anexosExibidos[tipo] === valor) return;
+    anexosExibidos[tipo] = valor;
+
+    try {
+        const { url, externo } = await api(`/chamados/${encodeURIComponent(idChamado)}/anexos/${tipo}`);
+        const endereco = externo ? url : API_URL + url;
+        const midia = tipo === "foto" ? $("img-foto") : $("player-video");
+        const texto = $(`texto-${tipo}`);
+
+        // Link externo pode ser uma página (ex.: Google Drive): mostra só o texto "Ver foto/vídeo"
+        midia.classList.toggle("d-none", externo);
+        texto.classList.toggle("d-none", !externo);
+        if (externo) texto.href = endereco;
+        else midia.src = endereco;
+        if (tipo === "foto") $("link-foto").href = endereco;
+    } catch (erro) {
+        const aviso = $("erro-anexo");
+        aviso.textContent = `Não foi possível carregar ${tipo === "foto" ? "a foto" : "o vídeo"}: ${erro.message}`;
+        aviso.classList.remove("d-none");
+    }
 }
 
 function preencherTela(chamado) {
@@ -122,13 +149,9 @@ function preencherTela(chamado) {
 
     $("descricao").textContent = chamado.descricao;
 
-    // Anexos (links)
-    const foto = $("anexo-foto");
-    const video = $("anexo-video");
-    foto.classList.toggle("d-none", !chamado.foto_url);
-    video.classList.toggle("d-none", !chamado.video_url);
-    if (chamado.foto_url) foto.href = chamado.foto_url;
-    if (chamado.video_url) video.href = chamado.video_url;
+    // Anexos: foto e vídeo aparecem na própria tela
+    mostrarAnexo("foto", chamado.foto_url);
+    mostrarAnexo("video", chamado.video_url);
     $("bloco-anexo").classList.toggle("d-none", !chamado.foto_url && !chamado.video_url);
 
     preencherHistorico(chamado.historico || []);

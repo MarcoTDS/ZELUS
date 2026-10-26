@@ -81,6 +81,7 @@ function extrairMensagem(status, corpo) {
     if (status === 401) return "Sessão expirada. Faça login novamente.";
     if (status === 403) return "Você não tem permissão para esta ação.";
     if (status === 404) return "Registro não encontrado.";
+    if (status === 413) return "O arquivo é maior que o permitido.";
     return "Ocorreu um erro inesperado. Tente novamente.";
 }
 
@@ -98,11 +99,13 @@ function redirecionar(caminho) {
  * Em caso de erro, lança ApiError com a mensagem pronta para exibir ao usuário.
  *
  * @param {string} caminho  Ex.: "/auth/login"
- * @param {object} opcoes   { metodo: "GET"|"POST"|"PUT"|"PATCH"|"DELETE", corpo: objeto, autenticado: true }
+ * @param {object} opcoes   { metodo: "GET"|"POST"|"PUT"|"PATCH"|"DELETE", corpo: objeto ou FormData, autenticado: true }
  */
 export async function api(caminho, { metodo = "GET", corpo = undefined, autenticado = true } = {}) {
+    // FormData (envio de arquivo): o navegador monta o Content-Type multipart sozinho
+    const ehArquivo = corpo instanceof FormData;
     const cabecalhos = { "Accept": "application/json" };
-    if (corpo !== undefined) cabecalhos["Content-Type"] = "application/json";
+    if (corpo !== undefined && !ehArquivo) cabecalhos["Content-Type"] = "application/json";
 
     const token = sessao.obterToken();
     if (autenticado && token) cabecalhos["Authorization"] = `Bearer ${token}`;
@@ -112,15 +115,20 @@ export async function api(caminho, { metodo = "GET", corpo = undefined, autentic
         resposta = await fetch(API_URL + caminho, {
             method: metodo,
             headers: cabecalhos,
-            body: corpo !== undefined ? JSON.stringify(corpo) : undefined
+            body: corpo === undefined || ehArquivo ? corpo : JSON.stringify(corpo)
         });
     } catch {
         throw new ApiError(0, "Não foi possível conectar ao servidor. Verifique se a API está rodando.");
     }
 
-    // Algumas respostas podem vir sem corpo
+    // Algumas respostas podem vir sem corpo, ou com HTML do Nginx (ex.: 413 de arquivo grande demais)
     const texto = await resposta.text();
-    const dados = texto ? JSON.parse(texto) : null;
+    let dados = null;
+    try {
+        dados = texto ? JSON.parse(texto) : null;
+    } catch {
+        dados = null;
+    }
 
     if (resposta.ok) return dados;
 

@@ -1,17 +1,20 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from database import get_db
 from models.enums import StatusChamadoEnum
 from schemas.chamado import (ChamadoCreate, ChamadoCriadoComAviso, ChamadoResponse, ChamadoStatusUpdate, ChamadoDetalheResponse,
-                             HistoricoChamadoResponse, SimilaridadeResponse, ResumoSindicoResponse)
-from service import chamado_service
+                             HistoricoChamadoResponse, SimilaridadeResponse, ResumoSindicoResponse,
+                             AnexoEnviadoResponse, AnexoLinkResponse)
+from service import chamado_service, anexo_service
 from routers.dependencias import get_morador, get_sindico, get_morador_ou_sindico
 
 router_chamados = APIRouter(prefix="/chamados", tags=["Chamados Help Desk"])
 
 FILTRO_TICKET = Query(None, description="Busca por número do ticket")
+TipoAnexo = Literal["foto", "video"]
 
 # ==========================================
 # MORADOR
@@ -30,6 +33,11 @@ def verificar_similaridade(id_categoria: int, id_unidade: int, db: Session = Dep
 @router_chamados.get("/meus", response_model=List[ChamadoResponse], summary="RF14 - Meus Chamados")
 def listar_meus_chamados(ticket: Optional[int] = FILTRO_TICKET, db: Session = Depends(get_db), usuario: dict = Depends(get_morador)):
     return chamado_service.listar_meus_chamados(db, usuario["id"], ticket)
+
+@router_chamados.post("/{id_chamado}/anexos/{tipo}", response_model=AnexoEnviadoResponse, status_code=status.HTTP_201_CREATED, summary="RF07 - Anexar foto ou vídeo")
+def anexar_arquivo(id_chamado: int, tipo: TipoAnexo, arquivo: UploadFile = File(...), db: Session = Depends(get_db), usuario: dict = Depends(get_morador)):
+    """Enviado logo após abrir o chamado. Foto: JPG, PNG ou WEBP até 5 MB. Vídeo: MP4, MOV ou WEBM até 50 MB."""
+    return anexo_service.salvar_anexo(db, id_chamado, tipo, arquivo, usuario)
 
 @router_chamados.get("/mural", response_model=List[ChamadoResponse], summary="RF17 - Mural do Condomínio")
 def visualizar_mural(ticket: Optional[int] = FILTRO_TICKET, db: Session = Depends(get_db), usuario: dict = Depends(get_morador_ou_sindico)):
@@ -71,6 +79,16 @@ def alterar_status_chamado(id_chamado: int, atualizacao: ChamadoStatusUpdate, db
 # ==========================================
 # MORADOR E SÍNDICO
 # ==========================================
+@router_chamados.get("/anexos/arquivo", summary="Arquivo do anexo (link temporário)")
+def baixar_anexo(token: str):
+    """Sem login: o acesso é pelo token do link gerado em /chamados/{id}/anexos/{tipo}, válido por 1 hora."""
+    caminho, tipo_mime = anexo_service.abrir_arquivo(token)
+    return FileResponse(caminho, media_type=tipo_mime, headers={"Cache-Control": "private, max-age=3600"})
+
+@router_chamados.get("/{id_chamado}/anexos/{tipo}", response_model=AnexoLinkResponse, summary="Link para ver a foto ou o vídeo")
+def obter_link_anexo(id_chamado: int, tipo: TipoAnexo, db: Session = Depends(get_db), usuario: dict = Depends(get_morador_ou_sindico)):
+    return anexo_service.gerar_link(db, id_chamado, tipo, usuario)
+
 @router_chamados.get("/{id_chamado}", response_model=ChamadoDetalheResponse, summary="RF18 - Detalhes do Chamado")
 def detalhar_chamado(id_chamado: int, db: Session = Depends(get_db), usuario: dict = Depends(get_morador_ou_sindico)):
     """RF18, RN10 - Detalhes do chamado e registro automático de 'visto' pelo síndico."""

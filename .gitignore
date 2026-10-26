@@ -9,3 +9,6 @@ __pycache__/
 __pycache__/
 *.pyc
 .env
+
+# Anexos dos chamados (fotos e vídeos enviados pelos moradores)
+chamados/

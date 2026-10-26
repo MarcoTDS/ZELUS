@@ -875,3 +875,14 @@ a.link-zelus:hover {
     --bs-modal-header-border-color: #46264F;
     --bs-modal-footer-border-color: #46264F;
 }
+
+/* Anexos do chamado: prévia na abertura e exibição nos detalhes */
+.anexo-midia {
+    display: block;
+    max-width: 100%;
+    max-height: 260px;
+    border-radius: 0.5rem;
+    border: 1px solid var(--bs-border-color);
+    background: var(--bs-tertiary-bg);
+    object-fit: contain;
+}

@@ -87,11 +87,21 @@
 
           <!-- Anexos: só aparecem se o chamado tiver foto/vídeo -->
           <div class="mb-3 d-none" id="bloco-anexo">
-            <p class="small text-muted mb-1">Anexo</p>
-            <div class="d-flex gap-3">
-              <a href="#" target="_blank" rel="noopener" class="link-zelus small d-none" id="anexo-foto">Ver foto</a>
-              <a href="#" target="_blank" rel="noopener" class="link-zelus small d-none" id="anexo-video">Ver vídeo</a>
+            <p class="small text-muted mb-1">Anexos</p>
+            <div class="row g-2">
+              <div class="col-md-6 d-none" id="anexo-foto">
+                <!-- Toque na foto para abrir em tamanho original -->
+                <a href="#" target="_blank" rel="noopener" id="link-foto">
+                  <img class="anexo-midia d-none" id="img-foto" alt="Foto anexada ao chamado">
+                  <span class="link-zelus small d-none" id="texto-foto">Ver foto</span>
+                </a>
+              </div>
+              <div class="col-md-6 d-none" id="anexo-video">
+                <video class="anexo-midia d-none" id="player-video" controls playsinline preload="metadata"></video>
+                <a href="#" target="_blank" rel="noopener" class="link-zelus small d-none" id="texto-video">Ver vídeo</a>
+              </div>
             </div>
+            <p class="small text-muted mt-1 mb-0 d-none" id="erro-anexo"></p>
           </div>
 
           <p class="small text-muted mb-2">Histórico</p>
