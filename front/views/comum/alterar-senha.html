@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alterar Senha | Zelus</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+  <!-- Ícones do menu e dos botões (usados pelo layout.js e por esta tela) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <link href="../../styles/global.css" rel="stylesheet">
+  <script src="../../scripts/shared/tema.js"></script>
+</head>
+<body data-protegida>
+
+  <!-- Cabeçalho montado pelo layout.js (logo, usuário, Sair e tema) -->
+  <header id="cabecalho"></header>
+
+  <!-- Tela Alterar Senha (RF15, RF16) — usada por todos os perfis -->
+  <main class="zelus-pagina">
+
+    <!-- Destino do voltar e rótulo mudam conforme o perfil (alterar-senha.js) -->
+    <a href="../morador/dashboard.html" class="voltar" id="link-voltar"><i class="bi bi-arrow-left"></i> Voltar ao dashboard</a>
+
+    <p class="rotulo-pagina mt-3" id="rotulo-perfil">Morador</p>
+    <h1 class="h3 mb-3">Alterar senha</h1>
+
+    <div id="alerta"></div>
+
+    <form id="form-senha" class="card shadow-sm" novalidate>
+      <div class="card-body p-4">
+
+        <div class="mb-3">
+          <label for="senhaAtual" class="form-label small">Senha atual</label>
+          <input type="password" class="form-control" id="senhaAtual" name="senha_atual"
+                 placeholder="••••••••" autocomplete="current-password" required>
+          <div class="invalid-feedback">Informe sua senha atual.</div>
+        </div>
+
+        <div class="row g-2">
+          <div class="col-md-6">
+            <label for="novaSenha" class="form-label small">Nova senha</label>
+            <input type="password" class="form-control" id="novaSenha" name="nova_senha"
+                   placeholder="••••••••" autocomplete="new-password" required>
+            <div class="invalid-feedback" id="erroNovaSenha">A senha precisa ter pelo menos 8 caracteres.</div>
+          </div>
+          <div class="col-md-6">
+            <label for="confirmarSenha" class="form-label small">Confirmar nova senha</label>
+            <input type="password" class="form-control" id="confirmarSenha"
+                   placeholder="••••••••" autocomplete="new-password" required>
+            <div class="invalid-feedback">As senhas não conferem.</div>
+          </div>
+        </div>
+
+        <!-- Requisitos: ficam verdes conforme a senha é digitada -->
+        <ul class="requisitos-senha small mt-2 mb-2" id="requisitos">
+          <li data-regra="tamanho">Pelo menos 8 caracteres</li>
+          <li data-regra="diferente">Diferente da senha atual</li>
+        </ul>
+
+        <button type="button" class="btn btn-link link-zelus small p-0" id="mostrarSenhas">Mostrar senhas</button>
+
+        <button type="submit" class="btn btn-zelus w-100 mt-4" id="btn-salvar">Alterar senha</button>
+
+      </div>
+    </form>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script type="module" src="../../scripts/comum/alterar-senha.js"></script>
+</body>
+</html>

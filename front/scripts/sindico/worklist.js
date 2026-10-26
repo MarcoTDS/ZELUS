@@ -5,7 +5,6 @@ import { montarCabecalho } from "../shared/layout.js";
 import { ROTAS } from "../shared/config.js";
 import { mostrarAlerta, limparAlerta, escaparHtml } from "../shared/ui.js";
 import { formatarTicket, descreverPrazo, seloStatus } from "../shared/formatos.js";
-import { atualizarPeriodicamente } from "../shared/atualizacao.js";
 
 const usuario = await protegerPagina({ perfis: ["Sindico"] });
 montarCabecalho(usuario);
@@ -31,9 +30,8 @@ function montarItem(chamado) {
         </a>`;
 }
 
-// silencioso: atualização automática (não mexe no aviso da tela nem apaga a lista se a API falhar)
-async function carregarChamados({ silencioso = false } = {}) {
-    if (!silencioso) limparAlerta(alerta);
+async function carregarChamados() {
+    limparAlerta(alerta);
     const ticket = campoTicket.value.replace(/\D/g, ""); // aceita "#0030" ou "30"
     const filtros = new URLSearchParams();
     if (ticket) filtros.set("ticket", ticket);
@@ -44,13 +42,12 @@ async function carregarChamados({ silencioso = false } = {}) {
         if (chamados.length) {
             lista.innerHTML = chamados.map(montarItem).join("");
         } else if (ticket || filtroStatus.value) {
-            // O link para o Histórico volta quando essa tela existir (fora da pré-banca)
-            lista.innerHTML = `<p class="texto-suave">Nenhum chamado em aberto encontrado com esse filtro.</p>`;
+            lista.innerHTML = `<p class="texto-suave">Nenhum chamado em aberto encontrado com esse filtro.
+                Procurando um chamado já finalizado? Veja no <a href="${ROTAS.sindico.historico}" class="link-zelus">Histórico</a>.</p>`;
         } else {
             lista.innerHTML = `<p class="texto-suave">Nenhum chamado em aberto no momento.</p>`;
         }
     } catch (erro) {
-        if (silencioso) throw erro;
         lista.innerHTML = "";
         mostrarAlerta(alerta, erro.message);
     }
@@ -60,11 +57,8 @@ formBusca.addEventListener("submit", (evento) => {
     evento.preventDefault();
     carregarChamados();
 });
-filtroStatus.addEventListener("change", () => carregarChamados());
+filtroStatus.addEventListener("change", carregarChamados);
 // O "x" do campo de busca limpa o filtro do ticket
 campoTicket.addEventListener("search", () => { if (!campoTicket.value) carregarChamados(); });
 
 await carregarChamados();
-
-// Chamados novos e mudanças de status aparecem sem recarregar a página (mantém o filtro escolhido)
-atualizarPeriodicamente(() => carregarChamados({ silencioso: true }));

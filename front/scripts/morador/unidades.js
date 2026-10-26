@@ -24,7 +24,7 @@ const CLASSES_STATUS = {
 
 const TEXTOS_STATUS = {
     Aprovado: "Aprovada",
-    Pendente: "Aguardando síndico",
+    Pendente: "Aguardando Síndico",
     Rejeitado: "Rejeitada"
 };
 
@@ -35,13 +35,13 @@ function podeEncerrar(vinculo) {
 }
 
 function montarItem(vinculo) {
-    const textoAcao = vinculo.status_aprovacao === "Aprovado" ? "Sair da unidade"
-        : vinculo.status_aprovacao === "Pendente" ? "Cancelar solicitação" : "Remover da lista";
+    const textoAcao = vinculo.status_aprovacao === "Aprovado" ? "Sair da Unidade"
+        : vinculo.status_aprovacao === "Pendente" ? "Cancelar Solicitação" : "Remover da Lista";
     const acao = podeEncerrar(vinculo) ? `
         <button type="button" class="btn btn-sm btn-outline-danger" data-id="${vinculo.id}" title="${textoAcao}">
             <i class="bi bi-x-circle"></i> <span class="d-none d-sm-inline">${textoAcao}</span>
         </button>` : `
-        <span class="small texto-suave" title="Para deixar o condomínio, procure o síndico">Unidade principal</span>`;
+        <span class="small texto-suave" title="Para deixar o condomínio, procure o síndico">Unidade Principal</span>`;
 
     return `
         <div class="item-lista">
@@ -94,8 +94,8 @@ lista.addEventListener("click", async (evento) => {
 
     const vinculo = vinculos.find((v) => v.id === Number(botao.dataset.id));
     const pergunta = vinculo.status_aprovacao === "Aprovado"
-        ? `Sair da unidade ${vinculo.unidade.identificacao}?\n\nVocê não poderá mais abrir chamados para ela. Os chamados já abertos continuam no histórico.`
-        : `Cancelar a solicitação da unidade ${vinculo.unidade.identificacao}?`;
+        ? `Sair da Unidade ${vinculo.unidade.identificacao}?\n\nVocê não poderá mais abrir chamados para ela. Os chamados já abertos continuam no histórico.`
+        : `Cancelar a solicitação da Unidade ${vinculo.unidade.identificacao}?`;
     if (vinculo.status_aprovacao !== "Rejeitado" && !confirm(pergunta)) return;
 
     limparAlerta(alerta);

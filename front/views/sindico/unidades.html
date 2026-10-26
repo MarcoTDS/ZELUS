@@ -15,14 +15,20 @@
     <!-- 1.15 Tela Gerenciamento de Unidades (RF20, RN17) -->
     <main class="zelus-pagina">
         <a href="dashboard.html" class="voltar"><i class="bi bi-arrow-left"></i> Voltar ao dashboard</a>
-        <h1 class="h4 titulo-pagina mb-3">Gerenciar Unidades</h1>
+
+        <p class="rotulo-pagina mt-3">Síndico</p>
+        <h1 class="h3 mb-3">Unidades</h1>
 
         <div id="alerta"></div>
 
+        <h2 class="h6 fw-semibold mb-2">Unidades Cadastradas</h2>
+
+        <!-- Lista montada pelo unidades.js, com os dados do banco -->
         <div id="lista-unidades">
             <p class="texto-suave">Carregando...</p>
         </div>
 
+        <!-- Adicionar unidade: os campos mudam conforme o tipo (o unidades.js ajusta os placeholders) -->
         <form id="form-unidade" class="cartao mt-3" novalidate>
             <h2 class="titulo-secao mt-0">Adicionar Unidade</h2>
             <div class="row g-2 align-items-start">
@@ -40,7 +46,7 @@
                     <input type="text" class="form-control" id="campo2" maxlength="50">
                 </div>
                 <div class="col-12 col-sm-auto">
-                    <button type="submit" id="btn-adicionar" class="btn btn-outline-secondary w-100">+ Adicionar</button>
+                    <button type="submit" id="btn-adicionar" class="btn btn-zelus w-100">+ Adicionar</button>
                 </div>
             </div>
         </form>

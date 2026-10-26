@@ -1,0 +1,250 @@
+/* Página inicial (index.html) — vitrine do Zelus antes do login.
+   Usa as variáveis e componentes do global.css (cores, botões, badges, .item-chamado);
+   aqui ficam só os blocos exclusivos da página, todos com prefixo "lp-". */
+
+html { scroll-behavior: smooth; }
+
+.pagina-inicial { background: var(--zelus-fundo); }
+
+/* ---------- Topo ---------- */
+.lp-topo {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    background: color-mix(in srgb, var(--zelus-card) 88%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--zelus-borda);
+}
+.lp-topo .navbar { padding: 0.6rem 0; }
+.lp-topo .lp-menu a {
+    color: var(--zelus-texto-suave);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.375rem;
+}
+.lp-topo .lp-menu a:hover { color: var(--zelus-destaque); background: var(--zelus-hover); }
+
+section[id] { scroll-margin-top: 4.5rem; }
+
+/* ---------- Hero ---------- */
+.lp-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 4.5rem 0 5rem;
+    background:
+        radial-gradient(60rem 30rem at 85% -10%, color-mix(in srgb, var(--zelus-primaria) 20%, transparent), transparent 60%),
+        radial-gradient(40rem 25rem at -5% 10%, color-mix(in srgb, var(--zelus-primaria) 11%, transparent), transparent 60%);
+}
+.lp-hero::before {            /* grade suave de fundo */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(var(--zelus-borda) 1px, transparent 1px),
+        linear-gradient(90deg, var(--zelus-borda) 1px, transparent 1px);
+    background-size: 44px 44px;
+    opacity: 0.35;
+    -webkit-mask-image: radial-gradient(ellipse at 70% 30%, #000 0%, transparent 70%);
+    mask-image: radial-gradient(ellipse at 70% 30%, #000 0%, transparent 70%);
+    pointer-events: none;
+}
+.lp-hero .container { position: relative; }
+
+.lp-selo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--zelus-borda-destaque);
+    background: var(--zelus-hover);
+    color: var(--zelus-destaque);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+.lp-hero h1 {
+    font-size: clamp(2rem, 4.6vw, 3.3rem);
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+.lp-hero h1 em {
+    font-style: normal;
+    color: var(--zelus-destaque);
+}
+.lp-hero .lead { max-width: 34rem; color: var(--zelus-texto-suave); font-size: 1.1rem; }
+
+.lp-pontos { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; }
+.lp-pontos li { font-size: 0.85rem; color: var(--zelus-texto-suave); display: flex; align-items: center; gap: 0.4rem; }
+.lp-pontos i { color: #2E9E5B; }
+
+/* Maquete da tela (ilustração feita em HTML/CSS) */
+.lp-maquete { position: relative; max-width: 30rem; margin: 1.5rem auto 2rem; }
+.lp-janela {
+    background: var(--zelus-card);
+    border: 1px solid var(--zelus-borda);
+    border-radius: 1rem;
+    box-shadow: 0 30px 60px -20px rgba(60, 20, 120, 0.35), 0 8px 20px -8px rgba(60, 20, 120, 0.15);
+    overflow: hidden;
+}
+.lp-janela-barra {
+    display: flex; align-items: center; gap: 0.4rem;
+    padding: 0.65rem 0.9rem;
+    border-bottom: 1px solid var(--zelus-borda);
+    background: var(--zelus-hover);
+}
+.lp-janela-barra span { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--zelus-borda-destaque); }
+.lp-janela-barra small { margin-left: auto; color: var(--zelus-texto-suave); font-size: 0.72rem; }
+.lp-janela-corpo { padding: 1.1rem; }
+.lp-janela-corpo .item-chamado { margin-bottom: 0.6rem; cursor: default; }
+.lp-janela-corpo .item-chamado:last-child { margin-bottom: 0; }
+
+.lp-flutuante {
+    position: absolute;
+    display: flex; align-items: center; gap: 0.6rem;
+    background: var(--zelus-card);
+    border: 1px solid var(--zelus-borda);
+    border-radius: 0.8rem;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.8rem;
+    box-shadow: 0 14px 30px -10px rgba(60, 20, 120, 0.35);
+}
+.lp-flutuante .lp-ico { width: 2rem; height: 2rem; font-size: 1rem; }
+.lp-flutuante small { display: block; color: var(--zelus-texto-suave); font-size: 0.7rem; }
+.lp-flutuante-a { left: -1.5rem; bottom: -1.6rem; }
+.lp-flutuante-b { right: -1rem; top: -1.4rem; }
+
+@media (prefers-reduced-motion: no-preference) {
+    .lp-flutuante-a { animation: lp-flutuar 6s ease-in-out infinite; }
+    .lp-flutuante-b { animation: lp-flutuar 7s ease-in-out -2s infinite; }
+}
+@keyframes lp-flutuar { 50% { transform: translateY(-8px); } }
+
+@media (max-width: 575.98px) {
+    .lp-flutuante-a { left: -0.5rem; }
+    .lp-flutuante-b { right: -0.5rem; }
+}
+
+/* ---------- Ícone em quadrado roxo ---------- */
+.lp-ico {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 2.75rem; height: 2.75rem;
+    border-radius: 0.75rem;
+    background: var(--zelus-hover);
+    color: var(--zelus-destaque);
+    border: 1px solid var(--zelus-borda-destaque);
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+/* ---------- Seções ---------- */
+.lp-secao { padding: 4.5rem 0; }
+.lp-secao-alt { background: var(--zelus-card); border-block: 1px solid var(--zelus-borda); }
+.lp-titulo-secao { max-width: 40rem; margin: 0 auto 2.75rem; text-align: center; }
+.lp-titulo-secao .lp-sobretitulo {
+    color: var(--zelus-destaque); font-size: 0.78rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem;
+}
+.lp-titulo-secao h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 700; letter-spacing: -0.01em; }
+.lp-titulo-secao p { color: var(--zelus-texto-suave); margin-bottom: 0; }
+
+/* Recursos */
+.lp-recurso {
+    height: 100%;
+    background: var(--zelus-card);
+    border: 1px solid var(--zelus-borda);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.lp-recurso:hover {
+    transform: translateY(-3px);
+    border-color: var(--zelus-borda-destaque);
+    box-shadow: 0 16px 30px -18px rgba(60, 20, 120, 0.4);
+}
+.lp-recurso h3 { font-size: 1.05rem; font-weight: 600; margin: 1rem 0 0.4rem; }
+.lp-recurso p { font-size: 0.9rem; color: var(--zelus-texto-suave); margin: 0; }
+
+/* Como funciona */
+.lp-passos { position: relative; counter-reset: passo; }
+.lp-passo {
+    position: relative; height: 100%;
+    background: var(--zelus-fundo);
+    border: 1px solid var(--zelus-borda);
+    border-radius: 1rem;
+    padding: 1.75rem 1.5rem 1.5rem;
+}
+.lp-passo::before {
+    counter-increment: passo;
+    content: counter(passo);
+    position: absolute; top: -1.1rem; left: 1.5rem;
+    width: 2.2rem; height: 2.2rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--zelus-primaria); color: #fff; font-weight: 700;
+    box-shadow: 0 6px 14px -4px rgba(123, 63, 228, 0.6);
+}
+.lp-passo h3 { font-size: 1.05rem; font-weight: 600; }
+.lp-passo p { font-size: 0.9rem; color: var(--zelus-texto-suave); margin: 0; }
+
+/* Para quem */
+.lp-perfil {
+    height: 100%;
+    background: var(--zelus-card);
+    border: 1px solid var(--zelus-borda);
+    border-radius: 1rem;
+    padding: 1.75rem;
+}
+.lp-perfil h3 { font-size: 1.2rem; font-weight: 700; margin: 0; }
+.lp-perfil .lp-rotulo { color: var(--zelus-destaque); font-size: 0.75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.lp-perfil ul { list-style: none; padding: 0; margin: 1.25rem 0 0; }
+.lp-perfil li { display: flex; gap: 0.6rem; font-size: 0.92rem; margin-bottom: 0.7rem; }
+.lp-perfil li i { color: var(--zelus-destaque); margin-top: 0.15rem; }
+.lp-perfil li:last-child { margin-bottom: 0; }
+
+/* Status */
+.lp-status {
+    display: flex; align-items: center; gap: 0.85rem;
+    background: var(--zelus-card);
+    border: 1px solid var(--zelus-borda);
+    border-radius: 0.8rem;
+    padding: 0.9rem 1rem;
+    height: 100%;
+}
+.lp-status .badge { min-width: 7.5rem; padding: 0.5em 0.8em; text-align: center; }
+.lp-status > span:not(.badge) { font-size: 0.85rem; color: var(--zelus-texto-suave); }
+
+/* Chamada final */
+.lp-cta {
+    position: relative; overflow: hidden;
+    border-radius: 1.5rem;
+    padding: 3.5rem 1.5rem;
+    text-align: center;
+    color: #fff;
+    background: linear-gradient(135deg, #5b2bb8 0%, #7B3FE4 55%, #9a63ee 100%);
+}
+.lp-cta::after {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(30rem 15rem at 90% 0%, rgba(255, 255, 255, .18), transparent 60%);
+    pointer-events: none;
+}
+.lp-cta > * { position: relative; z-index: 1; }
+.lp-cta h2 { font-weight: 700; font-size: clamp(1.6rem, 3vw, 2.2rem); }
+.lp-cta p { color: rgba(255, 255, 255, .85); max-width: 34rem; margin-inline: auto; }
+.lp-cta .btn-claro { background: #fff; color: #5b2bb8; font-weight: 600; border: 0; }
+.lp-cta .btn-claro:hover { background: #f1ebfb; color: #4a2299; }
+.lp-cta .btn-contorno { border: 1px solid rgba(255, 255, 255, .6); color: #fff; font-weight: 600; }
+.lp-cta .btn-contorno:hover { background: rgba(255, 255, 255, .14); color: #fff; }
+
+/* Rodapé */
+.lp-rodape { border-top: 1px solid var(--zelus-borda); background: var(--zelus-card); padding: 2.5rem 0 2rem; }
+.lp-rodape a { color: var(--zelus-texto-suave); text-decoration: none; font-size: 0.9rem; }
+.lp-rodape a:hover { color: var(--zelus-destaque); }
+.lp-rodape .lp-nota { color: var(--zelus-texto-suave); font-size: 0.8rem; }
+
+@media (max-width: 767.98px) {
+    .lp-hero { padding: 3rem 0 3.5rem; }
+    .lp-secao { padding: 3.25rem 0; }
+}

@@ -7,51 +7,54 @@ export const API_URL = LOCAL ? "http://127.0.0.1:8000" : "/api";
 
 // API pública de consulta de CEP (preenchimento do endereço do condomínio)
 export const VIACEP_URL = "https://viacep.com.br/ws";
- 
+
 // Caminhos das telas, a partir da pasta front/ (raiz do servidor).
 export const ROTAS = {
     login: "/views/auth/login.html",
     cadastro: "/views/auth/cadastro.html",
     trocarSenha: "/views/auth/trocar-senha.html",
- 
+
     // Dashboard de cada perfil
     inicio: {
         Morador: "/views/morador/dashboard.html",
         Sindico: "/views/sindico/dashboard.html",
         Administrador: "/views/admin/dashboard.html"
     },
- 
+
     // Administrador
     admin: {
         condominio: "/views/admin/cadastro-condominio.html",
         cadastroSindico: "/views/admin/cadastro-sindico.html"
     },
- 
+
     // Síndico
     sindico: {
         worklist: "/views/sindico/worklist.html",
         categorias: "/views/sindico/categorias.html",
         cadastrosPendentes: "/views/sindico/cadastros-pendentes.html",
+        historico: "/views/sindico/historico.html",
         moradores: "/views/sindico/moradores.html",
         unidades: "/views/sindico/unidades.html"
     },
- 
+
     // Morador
     morador: {
         novoChamado: "/views/morador/novo-chamado.html",
         unidades: "/views/morador/unidades.html"
     },
- 
+
     // Telas compartilhadas entre perfis
     comum: {
-        chamado: "/views/comum/chamado.html"      // abre com ?id=N
+        chamado: "/views/comum/chamado.html",      // abre com ?id=N
+        perfil: "/views/comum/perfil.html",
+        alterarSenha: "/views/comum/alterar-senha.html"
     }
- 
+
     // Fora da pré-banca (voltam aqui quando as telas forem refeitas):
-    // esqueciSenha, sindico.historico,
+    // esqueciSenha,
     // comum.mural, comum.perfil, comum.alterarSenha
 };
- 
+
 // ==========================================
 // MENU DA NAVBAR POR PERFIL
 // ==========================================

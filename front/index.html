@@ -4,13 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Zelus | HelpDesk de Manutenção Condominial</title>
+  <meta name="description" content="O Zelus organiza os chamados de manutenção do condomínio: o morador registra, o síndico prioriza pelo prazo e todos acompanham o andamento.">
 
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
     rel="stylesheet"
   >
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
   <link href="styles/global.css" rel="stylesheet">
+  <link href="styles/index.css" rel="stylesheet">
   <script src="scripts/shared/tema.js"></script>
 
   <!-- Usuário já logado vai direto para a tela inicial dele -->
@@ -26,7 +29,8 @@
 <!-- Página inicial (antes do login): apresenta o Zelus e leva ao login ou ao cadastro -->
 <body class="pagina-inicial">
 
-  <header class="zelus-topo">
+  <!-- ===== Topo ===== -->
+  <header class="lp-topo">
     <nav class="navbar">
       <div class="container">
         <a href="index.html" class="navbar-brand d-flex align-items-center gap-2 text-reset text-decoration-none">
@@ -47,7 +51,15 @@
           <span class="fw-semibold">Zelus</span>
         </a>
 
+        <div class="lp-menu d-none d-md-flex align-items-center gap-1">
+          <a href="#recursos">Recursos</a>
+          <a href="#como-funciona">Como Funciona</a>
+          <a href="#status">Status</a>
+          <a href="#para-quem">Para Quem</a>
+        </div>
+
         <div class="d-flex align-items-center gap-2">
+          <a href="views/auth/cadastro.html" class="btn btn-outline-zelus btn-sm d-none d-sm-inline-block">Cadastrar</a>
           <a href="views/auth/login.html" class="btn btn-zelus btn-sm">Entrar</a>
           <button type="button" id="btnTema" class="btn btn-outline-secondary btn-tema" aria-label="Mudar para modo escuro">
             <svg class="icone-lua" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -68,67 +80,259 @@
     </nav>
   </header>
 
-  <main class="container">
+  <main>
 
-    <!-- Apresentação -->
-    <section class="inicio-destaque text-center">
-      <h1 class="display-6 fw-semibold mb-3">Manutenção do condomínio, sem chamado perdido</h1>
-      <p class="lead texto-suave mx-auto mb-4">
-        O Zelus organiza os chamados de manutenção do seu condomínio: o morador registra o problema,
-        o síndico acompanha a fila por prioridade e todos sabem em que pé está cada atendimento.
-      </p>
-      <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
-        <a href="views/auth/login.html" class="btn btn-zelus btn-lg px-4">Entrar</a>
-        <a href="views/auth/cadastro.html" class="btn btn-outline-zelus btn-lg px-4">Sou morador, quero me cadastrar</a>
+    <!-- ===== Hero ===== -->
+    <section class="lp-hero">
+      <div class="container">
+        <div class="row align-items-center g-5">
+
+          <div class="col-lg-6">
+            <span class="lp-selo mb-3"><i class="bi bi-tools"></i> HelpDesk de Manutenção Condominial</span>
+            <h1 class="mb-3">Manutenção do condomínio, <em>sem chamado perdido</em></h1>
+            <p class="lead mb-4">
+              O morador registra o problema, o síndico atende por prioridade e todos
+              acompanham cada etapa, em um só lugar e sem depender de recado ou grupo de mensagens.
+            </p>
+            <ul class="lp-pontos">
+              <li><i class="bi bi-check-circle-fill"></i> Prazo de atendimento por categoria</li>
+              <li><i class="bi bi-check-circle-fill"></i> Histórico de cada chamado</li>
+              <li><i class="bi bi-check-circle-fill"></i> Acesso separado por perfil</li>
+            </ul>
+          </div>
+
+          <!-- Ilustração da tela de chamados (apenas exemplo visual) -->
+          <div class="col-lg-6">
+            <div class="lp-maquete" aria-hidden="true">
+              <div class="lp-janela">
+                <div class="lp-janela-barra">
+                  <span></span><span></span><span></span>
+                  <small>Exemplo ilustrativo</small>
+                </div>
+                <div class="lp-janela-corpo">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <strong>Meus Chamados</strong>
+                    <span class="small texto-suave">2 em aberto</span>
+                  </div>
+
+                  <div class="item-chamado urgencia-vencido">
+                    <div class="d-flex justify-content-between align-items-center gap-2">
+                      <span class="fw-semibold">Vazamento na garagem</span>
+                      <span class="badge badge-vencido">Vencido</span>
+                    </div>
+                    <p class="small detalhe mb-0">Hidráulica · Garagem · Prazo estourado</p>
+                  </div>
+
+                  <div class="item-chamado urgencia-media">
+                    <div class="d-flex justify-content-between align-items-center gap-2">
+                      <span class="fw-semibold">Lâmpada queimada no corredor</span>
+                      <span class="badge badge-em-andamento">Em Andamento</span>
+                    </div>
+                    <p class="small detalhe mb-0">Elétrica · Bloco A · Expira em 1 dia</p>
+                  </div>
+
+                  <div class="item-chamado">
+                    <div class="d-flex justify-content-between align-items-center gap-2">
+                      <span class="fw-semibold">Portão do salão com folga</span>
+                      <span class="badge badge-resolvido">Resolvido</span>
+                    </div>
+                    <p class="small detalhe mb-0">Estrutura · Salão de festas · Concluído no prazo</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="lp-flutuante lp-flutuante-a">
+                <span class="lp-ico"><i class="bi bi-eye"></i></span>
+                <div><strong>Visto pelo síndico</strong><small>Você sabe quando ele abriu</small></div>
+              </div>
+              <div class="lp-flutuante lp-flutuante-b">
+                <span class="lp-ico"><i class="bi bi-hourglass-split"></i></span>
+                <div><strong>Prazo (SLA)</strong><small>Contagem para cada chamado</small></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </section>
 
-    <!-- Como funciona (objetivos específicos do Termo de Abertura) -->
-    <section class="row g-3 mb-5">
-      <div class="col-md-4">
-        <div class="cartao h-100">
-          <h2 class="h6 fw-semibold">Abra chamados em minutos</h2>
-          <p class="small texto-suave mb-0">
-            Informe título, categoria, unidade e descrição, com foto ou vídeo opcional.
-            Você acompanha o status e o histórico de cada chamado.
-          </p>
+    <!-- ===== Recursos ===== -->
+    <section class="lp-secao lp-secao-alt" id="recursos">
+      <div class="container">
+        <div class="lp-titulo-secao">
+          <p class="lp-sobretitulo">Recursos</p>
+          <h2>Tudo o que a manutenção do seu condomínio precisa</h2>
+          <p>Do primeiro aviso à conclusão, cada etapa fica registrada e visível para quem precisa.</p>
         </div>
-      </div>
-      <div class="col-md-4">
-        <div class="cartao h-100">
-          <h2 class="h6 fw-semibold">Prioridade pelo prazo (SLA)</h2>
-          <p class="small texto-suave mb-0">
-            Cada categoria tem um prazo de atendimento. A fila do síndico mostra primeiro o que
-            está perto de vencer e destaca o que já venceu.
-          </p>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="cartao h-100">
-          <h2 class="h6 fw-semibold">Transparência para o condomínio</h2>
-          <p class="small texto-suave mb-0">
-            O mural mostra os chamados do condomínio e o painel do síndico reúne os números
-            de chamados abertos, urgentes e vencidos.
-          </p>
+
+        <div class="row g-3 g-lg-4">
+          <div class="col-md-6 col-lg-4">
+            <div class="lp-recurso">
+              <span class="lp-ico"><i class="bi bi-plus-circle"></i></span>
+              <h3>Abra chamados em minutos</h3>
+              <p>Informe título, categoria, unidade e descrição, com foto ou vídeo se ajudar a explicar o problema.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="lp-recurso">
+              <span class="lp-ico"><i class="bi bi-hourglass-split"></i></span>
+              <h3>Prioridade pelo prazo (SLA)</h3>
+              <p>Cada categoria tem um prazo de atendimento. A fila mostra primeiro o que está perto de vencer e destaca o que já venceu.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="lp-recurso">
+              <span class="lp-ico"><i class="bi bi-clock-history"></i></span>
+              <h3>Histórico Completo</h3>
+              <p>Toda mudança de status fica registrada com data e observação, e o morador acompanha o andamento sem precisar perguntar.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="lp-recurso">
+              <span class="lp-ico"><i class="bi bi-eye"></i></span>
+              <h3>Confirmação de Visualização</h3>
+              <p>Quando o síndico abre o chamado, o morador vê o marcador “Visto” com a data e a hora.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="lp-recurso">
+              <span class="lp-ico"><i class="bi bi-megaphone"></i></span>
+              <h3>Mural do Condomínio</h3>
+              <p>Os moradores veem os chamados do condomínio, o que evita pedidos repetidos e dá transparência ao atendimento.</p>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <div class="lp-recurso">
+              <span class="lp-ico"><i class="bi bi-speedometer2"></i></span>
+              <h3>Painel do Síndico</h3>
+              <p>Números de chamados abertos, urgentes e vencidos, além de histórico, moradores e unidades do condomínio.</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Quem usa -->
-    <section class="cartao mb-5">
-      <h2 class="h6 fw-semibold mb-3">Como começar</h2>
-      <ol class="small mb-0 ps-3">
-        <li class="mb-2"><strong>Morador:</strong> faça o cadastro escolhendo o condomínio e a(s) sua(s) unidade(s). O acesso é liberado depois da aprovação do síndico.</li>
-        <li class="mb-2"><strong>Síndico:</strong> recebe o acesso do administrador por e-mail, com senha provisória e link de validação.</li>
-        <li><strong>Já tem conta?</strong> <a href="views/auth/login.html" class="link-zelus">Entre com seu e-mail e senha</a>.</li>
-      </ol>
+    <!-- ===== Como funciona ===== -->
+    <section class="lp-secao" id="como-funciona">
+      <div class="container">
+        <div class="lp-titulo-secao">
+          <p class="lp-sobretitulo">Como funciona</p>
+          <h2>Do problema à solução, em três passos</h2>
+          <p>Um fluxo simples, o mesmo para todos os condomínios.</p>
+        </div>
+
+        <div class="row g-4 lp-passos">
+          <div class="col-md-4">
+            <div class="lp-passo">
+              <h3>Registre</h3>
+              <p>O morador abre o chamado escolhendo categoria e unidade. Se já houver um parecido em aberto, o Zelus avisa antes de enviar.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="lp-passo">
+              <h3>Priorize</h3>
+              <p>O síndico recebe o chamado na fila, ordenada pelo prazo, e atualiza o status conforme o atendimento avança.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="lp-passo">
+              <h3>Acompanhe e finalize</h3>
+              <p>O morador acompanha o histórico até o chamado ser resolvido ou cancelado, e o registro fica guardado.</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
-  </main>
+    <!-- ===== Status ===== -->
+    <section class="lp-secao lp-secao-alt" id="status">
+      <div class="container">
+        <div class="lp-titulo-secao">
+          <p class="lp-sobretitulo">Status</p>
+          <h2>Cada chamado tem uma situação clara</h2>
+          <p>As cores são as mesmas em todo o sistema, então dá para entender a fila de relance.</p>
+        </div>
 
-  <footer class="text-center small texto-suave py-4">
-    Zelus · HelpDesk de Manutenção Condominial
+        <div class="row g-3">
+          <div class="col-sm-6 col-lg-4"><div class="lp-status"><span class="badge badge-aberto">Aberto</span><span>Registrado e aguardando atendimento.</span></div></div>
+          <div class="col-sm-6 col-lg-4"><div class="lp-status"><span class="badge badge-em-andamento">Em Andamento</span><span>O síndico já está cuidando do problema.</span></div></div>
+          <div class="col-sm-6 col-lg-4"><div class="lp-status"><span class="badge badge-resolvido">Resolvido</span><span>Problema solucionado, chamado finalizado.</span></div></div>
+          <div class="col-sm-6 col-lg-4"><div class="lp-status"><span class="badge badge-cancelado">Cancelado</span><span>Encerrado sem atendimento.</span></div></div>
+          <div class="col-sm-6 col-lg-4"><div class="lp-status"><span class="badge badge-vencido">Vencido</span><span>O prazo de atendimento foi ultrapassado.</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Para quem ===== -->
+    <section class="lp-secao" id="para-quem">
+      <div class="container">
+        <div class="lp-titulo-secao">
+          <p class="lp-sobretitulo">Para quem</p>
+          <h2>Cada perfil vê o que precisa</h2>
+          <p>O acesso é separado por perfil, para cada pessoa usar só o que é da sua função.</p>
+        </div>
+
+        <div class="row g-3 g-lg-4">
+          <div class="col-lg-6">
+            <div class="lp-perfil">
+              <div class="d-flex align-items-center gap-3">
+                <span class="lp-ico"><i class="bi bi-person"></i></span>
+                <div><div class="lp-rotulo">Perfil</div><h3>Morador</h3></div>
+              </div>
+              <ul>
+                <li><i class="bi bi-check2-circle"></i> Abre chamados para as unidades a que tem acesso</li>
+                <li><i class="bi bi-check2-circle"></i> Acompanha status, prazo e histórico de cada chamado</li>
+                <li><i class="bi bi-check2-circle"></i> Consulta o mural do condomínio</li>
+                <li><i class="bi bi-check2-circle"></i> Cadastro próprio, liberado após a aprovação do síndico</li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="lp-perfil">
+              <div class="d-flex align-items-center gap-3">
+                <span class="lp-ico"><i class="bi bi-building"></i></span>
+                <div><div class="lp-rotulo">Perfil</div><h3>Síndico</h3></div>
+              </div>
+              <ul>
+                <li><i class="bi bi-check2-circle"></i> Atende a fila de chamados ordenada por prazo</li>
+                <li><i class="bi bi-check2-circle"></i> Atualiza o status e registra observações que o morador enxerga</li>
+                <li><i class="bi bi-check2-circle"></i> Aprova moradores e gerencia unidades e categorias</li>
+                <li><i class="bi bi-check2-circle"></i> Recebe o acesso do administrador por e-mail, com link de validação</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    </main>
+
+  <!-- ===== Rodapé ===== -->
+  <footer class="lp-rodape text-center">
+    <div class="container">
+      <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
+        <div class="logo-zelus logo-zelus-sm">
+              <svg class="figura-zelus" viewBox="0 0 400 400" aria-hidden="true">
+                <g class="ferramentas-zelus">
+                  <path d="M 128 128 L 102 102 M 102 102 L 83 108 L 60 77 L 72 65 L 104 87 Z"/>
+                  <path d="M 254 113 C 246 87, 265 60, 291 59 C 305 57, 307 62, 297 72 L 283 86 C 274 97, 280 110, 289 117 C 299 126, 311 126, 321 116 L 335 102 C 344 92, 348 98, 345 111 C 341 138, 319 155, 289 149"/>
+                  <path d="M 286 247 L 336 297 Q 346 307, 336 317 L 318 335 Q 308 345, 298 335 L 248 285"/>
+                  <path d="M 113 254 C 87 246, 60 265, 59 291 C 57 305, 62 307, 72 297 L 86 283 C 97 274, 110 280, 117 289 C 126 299, 126 311, 116 321 L 102 335 C 92 344, 98 348, 111 345 C 138 341, 155 319, 149 289"/>
+                </g>
+                <g class="engrenagem-zelus">
+                  <path d="M 184 112 L 216 112 L 216 133 L 237 142 L 252 127 L 275 150 L 260 165 L 269 184 L 290 184 L 290 216 L 269 216 L 260 237 L 275 252 L 252 275 L 237 260 L 216 269 L 216 290 L 184 290 L 184 269 L 163 260 L 148 275 L 125 252 L 140 237 L 131 216 L 110 216 L 110 184 L 131 184 L 140 165 L 125 150 L 148 127 L 163 142 L 184 133 Z"/>
+                  <circle cx="200" cy="200" r="39"/>
+                </g>
+              </svg>
+            </div>
+        <strong>Zelus</strong>
+      </div>
+      <p class="mb-1">HelpDesk de Manutenção Condominial</p>
+      <p class="lp-nota mb-1">Projeto Acadêmico de Análise e Desenvolvimento de Sistemas</p>
+      <p class="lp-nota mb-0">Instituto Federal do Paraná - IFPR - Campus Foz do Iguaçu</p>
+    </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

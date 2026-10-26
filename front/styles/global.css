@@ -827,3 +827,51 @@ a.link-zelus:hover {
     font-weight: 600;
     line-height: 1.2;
 }
+
+/* ==========================================
+   AJUSTES VINDOS DO estilo.css
+   ========================================== */
+
+/* Campo bloqueado ou somente leitura no modo escuro (ex.: unidade no perfil) */
+[data-bs-theme="dark"] .form-control:disabled,
+[data-bs-theme="dark"] .form-control[readonly] {
+    background-color: #2A1630;
+    color: #8A7395;
+}
+
+/* Etiqueta "Você" nos chamados do próprio morador (mural) */
+.badge-voce {
+    background: #F1EBFB;
+    color: #4B2394;
+    border: 1px solid #B98CF0;
+}
+
+[data-bs-theme="dark"] .badge-voce {
+    background: #3A1F45;
+    color: #D9C9E3;
+    border-color: #6B3C7A;
+}
+
+/* Botão de tema sobre o fundo do login, no modo escuro */
+[data-bs-theme="dark"] .pagina-login .btn-tema {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.65);
+}
+
+[data-bs-theme="dark"] .pagina-login .btn-tema:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #fff;
+}
+
+/* Resumo do dashboard: peso e espaçamento do design */
+.card-resumo-rotulo { margin-bottom: 2px; }
+.card-resumo-numero { font-weight: 500; }
+
+/* Janela (modal) no modo escuro */
+[data-bs-theme="dark"] .modal-content {
+    --bs-modal-bg: #2E1834;
+    --bs-modal-border-color: #46264F;
+    --bs-modal-header-border-color: #46264F;
+    --bs-modal-footer-border-color: #46264F;
+}

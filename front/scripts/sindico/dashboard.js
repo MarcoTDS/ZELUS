@@ -28,7 +28,7 @@ const motivoSair = document.getElementById("motivo-sair");
 function liberarSaida(chamadosEmAberto) {
     botaoSair.disabled = chamadosEmAberto > 0;
     motivoSair.hidden = chamadosEmAberto === 0;
-    motivoSair.textContent = `Há ${chamadosEmAberto} chamado(s) Aberto ou Em Andamento. Resolva ou cancele antes de sair.`;
+    motivoSair.textContent = `Há ${chamadosEmAberto} chamado(s) Aberto ou Em Andamento. Resolva antes de sair.`;
 }
 
 botaoSair.addEventListener("click", async () => {
