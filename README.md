@@ -247,12 +247,6 @@ Em produção, ele roda numa VPS Ubuntu com:
 - **PostgreSQL** local;
 - **HTTPS** com Let's Encrypt (Certbot).
 
-O url de deploy seria:
-
-```env
-https://zelus.api.br
-```
-
 ## Documentação do projeto
 
 - Termo de abertura
