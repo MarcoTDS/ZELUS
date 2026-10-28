@@ -1,10 +1,11 @@
 import os
 from sqlalchemy.orm import Session
+from fastapi import HTTPException
 import bcrypt
 from datetime import datetime
 from models.usuario import UsuarioDB
 from models.enums import PerfilUsuarioEnum, TipoTokenEnum
-from schemas.usuario import UsuarioCreate, CadastroMoradorRequest
+from schemas.usuario import UsuarioCreate, CadastroMoradorRequest, SENHA_MIN
 from service import token_service, vinculo_service
 from service.email_service import enviar_email
 
@@ -47,8 +48,14 @@ def obter_usuario_por_email(db: Session, email: str):
 # AUTENTICAÇÃO (RF01, RN12, RN13)
 # ==========================================
 def autenticar_usuario(db: Session, email: str, senha_plana: str):
-    usuario = buscar_por_email(db, email)
+    usuario = obter_usuario_por_email(db, email)
     if not usuario or not verificar_senha(senha_plana, usuario.senha):
+        return None
+
+    if not usuario.ativo:
+        # Morador removido de todas as unidades: a conta é reaproveitada pela Tela de Cadastro
+        if vinculo_service.morador_sem_unidade(db, usuario):
+            raise PermissionError("Sua conta não está vinculada a nenhuma unidade. Para solicitar uma nova, acesse \"Cadastre-se\" e informe este mesmo e-mail.")
         return None
 
     # RN12: O síndico só acessa após validar o e-mail pelo link
@@ -88,18 +95,39 @@ def criar_usuario(db: Session, usuario: UsuarioCreate):
     db.refresh(db_usuario)
     return db_usuario
 
-def cadastrar_morador(db: Session, dados: CadastroMoradorRequest):
-    # RN11: E-mail que já corresponde a uma conta existente bloqueia a solicitação
-    if obter_usuario_por_email(db, dados.email):
-        raise ValueError("Já existe uma conta cadastrada com este e-mail.")
+def verificar_email_cadastro(db: Session, email: str) -> str:
+    # Tela de Cadastro: decide quais campos são exibidos depois que o e-mail é digitado
+    usuario = obter_usuario_por_email(db, email)
+    if not usuario:
+        return "novo"          # Exibe nome, senha, condomínio e unidade
+    if vinculo_service.morador_sem_unidade(db, usuario):
+        return "sem_unidade"   # Conta reaproveitada: exibe senha atual, condomínio e unidade
+    return "existente"         # Conta em uso: o usuário deve entrar pelo login
 
-    novo_usuario = UsuarioDB(
-        nome=dados.nome,
-        email=dados.email,
-        senha=obter_hash_senha(dados.senha),
-        perfil=PerfilUsuarioEnum.Morador
-    )
-    db.add(novo_usuario)
+def cadastrar_morador(db: Session, dados: CadastroMoradorRequest):
+    usuario = obter_usuario_por_email(db, dados.email)
+
+    if usuario:
+        # RN11: E-mail de uma conta em uso bloqueia a solicitação.
+        # Exceção: morador sem unidade reaproveita a própria conta, confirmando a senha atual.
+        if not vinculo_service.morador_sem_unidade(db, usuario):
+            raise ValueError("Já existe uma conta cadastrada com este e-mail.")
+        if not verificar_senha(dados.senha, usuario.senha):
+            raise HTTPException(status_code=401, detail="Senha incorreta. Informe a senha da sua conta.")
+        usuario.ativo = True # Fica ativo, mas só acessa o sistema após a aprovação do síndico
+        novo_usuario = usuario
+    else:
+        if not dados.nome:
+            raise HTTPException(status_code=400, detail="Informe o nome completo.")
+        if len(dados.senha) < SENHA_MIN:
+            raise HTTPException(status_code=400, detail=f"A senha deve ter pelo menos {SENHA_MIN} caracteres.")
+        novo_usuario = UsuarioDB(
+            nome=dados.nome,
+            email=dados.email,
+            senha=obter_hash_senha(dados.senha),
+            perfil=PerfilUsuarioEnum.Morador
+        )
+        db.add(novo_usuario)
     db.flush()
 
     # RF06: Uma solicitação por unidade, pendente até a aprovação do síndico (tudo na mesma transação)
@@ -109,7 +137,7 @@ def cadastrar_morador(db: Session, dados: CadastroMoradorRequest):
             for id_unidade in dict.fromkeys(dados.ids_unidades) # ignora unidades repetidas
         ]
     except Exception:
-        db.rollback() # Alguma unidade inválida: nada é criado
+        db.rollback() # Alguma unidade inválida: nada é criado nem reativado
         raise
 
     db.commit()
@@ -142,8 +170,9 @@ def alterar_senha(db: Session, id_usuario: int, senha_atual: str, nova_senha: st
 
 def solicitar_redefinicao_senha(db: Session, email: str):
     # RF19/RN16: Por segurança, a resposta ao usuário é a mesma exista ou não o e-mail
-    usuario = buscar_por_email(db, email)
-    if not usuario:
+    usuario = obter_usuario_por_email(db, email)
+    # Morador sem unidade também recebe o link: ele precisa da senha para pedir nova unidade no cadastro
+    if not usuario or not (usuario.ativo or vinculo_service.morador_sem_unidade(db, usuario)):
         return
 
     token = token_service.gerar_token(db, usuario.id, TipoTokenEnum.Redefinicao_Senha)

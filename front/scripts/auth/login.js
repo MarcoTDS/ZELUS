@@ -16,7 +16,7 @@ const MENSAGENS_MOTIVO = {
 
 const MENSAGENS_VINCULO = {
     Pendente: "Seu cadastro ainda está pendente de aprovação pelo síndico. Você poderá entrar assim que ele for aprovado.",
-    Rejeitado: "Sua solicitação de cadastro foi rejeitada pelo síndico. Procure a administração do condomínio."
+    Rejeitado: "Sua solicitação de cadastro foi rejeitada pelo síndico. Para pedir outra unidade, acesse \"Cadastre-se\" e informe este mesmo e-mail."
 };
 
 // Mensagem vinda de um redirecionamento (ex.: ?motivo=sessao)
@@ -55,7 +55,7 @@ form.addEventListener("submit", async (evento) => {
         sessao.salvar(resposta.access_token, usuario);
         window.location.replace(rotaInicial(usuario));
     } catch (erro) {
-        // 401: e-mail ou senha incorretos | 403: e-mail não validado (RN12) | 0: API fora do ar
+        // 401: e-mail ou senha incorretos | 403: e-mail não validado (RN12) ou morador sem unidade | 0: API fora do ar
         mostrarAlerta(alerta, erro.message);
         form.senha.value = "";
         form.classList.remove("was-validated");

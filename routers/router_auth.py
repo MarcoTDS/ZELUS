@@ -5,7 +5,7 @@ from typing import List
 from database import get_db
 from schemas.usuario import (LoginRequest, LoginResponse, UsuarioLogadoResponse, UsuarioResponse, CadastroMoradorRequest,
                              AlterarSenhaRequest, EditarPerfilRequest, EsqueciSenhaRequest, RedefinirSenhaRequest,
-                             ValidarEmailRequest, MensagemResponse)
+                             ValidarEmailRequest, MensagemResponse, VerificarEmailRequest, VerificarEmailResponse)
 from schemas.unidade import UnidadeResumo
 from schemas.vinculo import CadastroMoradorResponse
 from service import usuario_service, auth_service, vinculo_service, admin_service
@@ -34,9 +34,15 @@ def login(credenciais: LoginRequest, db: Session = Depends(get_db)):
         "usuario": auth_service.montar_usuario_atual(db, token)
     }
 
+@router_auth.post("/cadastro/verificar-email", response_model=VerificarEmailResponse, summary="RF05/RF06 - Verificar e-mail na Tela de Cadastro")
+def verificar_email_cadastro(dados: VerificarEmailRequest, db: Session = Depends(get_db)):
+    """Consulta no banco (sem envio de e-mail) que define os campos do cadastro: conta nova, morador sem unidade ou conta em uso."""
+    return {"situacao": usuario_service.verificar_email_cadastro(db, dados.email)}
+
 @router_auth.post("/cadastro", response_model=CadastroMoradorResponse, status_code=status.HTTP_201_CREATED, summary="RF05/RF06 - Cadastro do Morador")
 def cadastrar_morador(dados: CadastroMoradorRequest, db: Session = Depends(get_db)):
-    """RF05, RF06, RN11 - Cria o morador e uma solicitação de vínculo por unidade, pendentes até a aprovação do síndico."""
+    """RF05, RF06, RN11 - Cria o morador e uma solicitação de vínculo por unidade, pendentes até a aprovação do síndico.
+    Morador sem unidade (e-mail já cadastrado): reaproveita a conta, confirmando a senha atual, e cria as novas solicitações."""
     try:
         usuario, vinculos = usuario_service.cadastrar_morador(db, dados)
     except ValueError as e:

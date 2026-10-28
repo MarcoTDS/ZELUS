@@ -135,7 +135,7 @@ async function executarRemocao(morador, idVinculo) {
     limparAlerta(alerta);
     try {
         const resultado = await api(`/moradores/vinculos/${idVinculo}/remover`, { metodo: "PATCH" });
-        const complemento = resultado.usuario_inativado ? " Sem outra unidade, o acesso ao sistema foi bloqueado." : "";
+        const complemento = resultado.usuario_inativado ? " Sem outra unidade, o acesso ao sistema foi bloqueado até ele solicitar uma nova unidade pelo cadastro, com o mesmo e-mail." : "";
         mostrarAlerta(alerta, `Vínculo de ${morador.nome} com a unidade ${unidade.identificacao} removido.${complemento}`, "success");
         await carregarMoradores();
     } catch (erro) {

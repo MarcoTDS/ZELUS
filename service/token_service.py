@@ -6,6 +6,7 @@ import secrets
 from models.token import TokenUsuarioDB
 from models.usuario import UsuarioDB
 from models.enums import TipoTokenEnum
+from service import vinculo_service
 
 # Prazos de validade dos links enviados por e-mail
 VALIDADE_TOKEN = {
@@ -50,7 +51,8 @@ def consumir_token(db: Session, token: str, tipo: TipoTokenEnum) -> UsuarioDB:
     if registro.data_expiracao < datetime.utcnow():
         raise ValueError("Link expirado. Solicite um novo.")
 
-    if not registro.usuario.ativo:
+    # Morador sem unidade (conta inativada ao sair da última unidade) pode redefinir a senha para pedir nova unidade
+    if not registro.usuario.ativo and not vinculo_service.morador_sem_unidade(db, registro.usuario):
         raise ValueError("Usuário inativo.")
 
     registro.data_uso = datetime.utcnow()

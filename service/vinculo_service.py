@@ -4,7 +4,7 @@ from datetime import datetime
 from models.vinculo import VinculoMoradorDB, StatusVinculoEnum
 from models.condominio import CondominioDB, UnidadeDB
 from models.usuario import UsuarioDB
-from models.enums import TipoUnidadeEnum
+from models.enums import TipoUnidadeEnum, PerfilUsuarioEnum
 from schemas.vinculo import VinculoCreate
 
 # ==========================================
@@ -53,6 +53,17 @@ def listar_unidades_do_morador(db: Session, id_usuario: int):
         VinculoMoradorDB.ativo == True,
         UnidadeDB.ativo == True
     ).all()
+
+def morador_sem_unidade(db: Session, usuario: UsuarioDB) -> bool:
+    # Morador sem unidade aprovada nem solicitação pendente: removido de todas as unidades ou só com solicitações rejeitadas.
+    # Pode reaproveitar a conta na Tela de Cadastro para pedir uma nova unidade (RF06, RN11).
+    if usuario.perfil != PerfilUsuarioEnum.Morador:
+        return False
+    return db.query(VinculoMoradorDB).filter(
+        VinculoMoradorDB.id_usuario == usuario.id,
+        VinculoMoradorDB.status_aprovacao != StatusVinculoEnum.Rejeitado,
+        VinculoMoradorDB.ativo == True
+    ).first() is None
 
 def morador_pertence_ao_condominio(db: Session, id_usuario: int, id_condominio: int) -> bool:
     return db.query(VinculoMoradorDB).join(UnidadeDB).filter(

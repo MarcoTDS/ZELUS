@@ -67,17 +67,7 @@
       <div id="alerta"></div>
 
       <form id="form-cadastro">
-        <div class="mb-3">
-          <label for="nome" class="form-label small">Nome Completo</label>
-          <input
-            type="text"
-            class="form-control"
-            id="nome"
-            placeholder="Seu nome"
-            required
-          >
-        </div>
-
+        <!-- O e-mail vem primeiro: a consulta no banco define quais campos aparecem -->
         <div class="mb-3">
           <label for="email" class="form-label small">E-mail</label>
           <input
@@ -85,46 +75,66 @@
             class="form-control"
             id="email"
             placeholder="nome@email.com"
+            autocomplete="email"
             required
+          >
+          <div class="form-text" id="info-email" aria-live="polite">Digite seu e-mail para continuar.</div>
+        </div>
+
+        <div class="mb-3" id="grupo-nome" hidden>
+          <label for="nome" class="form-label small">Nome Completo</label>
+          <input
+            type="text"
+            class="form-control"
+            id="nome"
+            placeholder="Seu nome"
+            minlength="3"
+            required
+            disabled
           >
         </div>
 
-        <div class="mb-3">
-          <label for="senha" class="form-label small">Senha</label>
+        <div class="mb-3" id="grupo-senha" hidden>
+          <label for="senha" class="form-label small" id="rotulo-senha">Senha</label>
           <input
             type="password"
             class="form-control"
             id="senha"
             placeholder="••••••••"
             required
+            disabled
           >
+          <div class="form-text" id="ajuda-senha"></div>
         </div>
 
-        <div class="mb-3">
-          <label for="condominio" class="form-label small">Condomínio</label>
-          <!-- A lista é preenchida pelo script, com os dados do banco -->
-          <select class="form-select" id="condominio" required>
-            <option selected disabled value="">Carregando...</option>
-          </select>
-        </div>
-
-        <fieldset class="mb-3">
-          <legend class="form-label small mb-1">Unidade(s)</legend>
-          <!-- Caixas de seleção montadas pelo script depois de escolher o condomínio -->
-          <div class="lista-unidades-cadastro" id="lista-unidades">
-            <p class="small texto-suave mb-0">Escolha o condomínio antes.</p>
+        <div id="grupo-unidades" hidden>
+          <div class="mb-3">
+            <label for="condominio" class="form-label small">Condomínio</label>
+            <!-- A lista é preenchida pelo script, com os dados do banco -->
+            <select class="form-select" id="condominio" required disabled>
+              <option selected disabled value="">Carregando...</option>
+            </select>
           </div>
-          <div class="form-text">Marque todas as unidades em que você mora ou é responsável.</div>
-          <div class="invalid-feedback d-block" id="erro-unidades" hidden>Selecione ao menos uma unidade.</div>
-        </fieldset>
 
-        <div class="alert alert-zelus small mb-3" role="alert">
-          Seu cadastro ficará pendente até aprovação do síndico.
+          <fieldset class="mb-3">
+            <legend class="form-label small mb-1">Unidade(s)</legend>
+            <!-- Caixas de seleção montadas pelo script depois de escolher o condomínio -->
+            <div class="lista-unidades-cadastro" id="lista-unidades">
+              <p class="small texto-suave mb-0">Escolha o condomínio antes.</p>
+            </div>
+            <div class="form-text">Marque todas as unidades em que você mora ou é responsável.</div>
+            <!-- Estilo no próprio elemento (e não a classe d-block), para o atributo hidden conseguir esconder a mensagem -->
+            <div class="invalid-feedback" style="display: block;" id="erro-unidades" hidden>Selecione ao menos uma unidade.</div>
+          </fieldset>
+
+          <div class="alert alert-zelus small mb-3" role="alert">
+            Seu cadastro ficará pendente até aprovação do síndico.
+          </div>
+
+          <button type="submit" id="btn-enviar" class="btn btn-zelus w-100 mb-3">
+            Enviar Solicitação
+          </button>
         </div>
-
-        <button type="submit" id="btn-enviar" class="btn btn-zelus w-100 mb-3">
-          Enviar Solicitação
-        </button>
       </form>
 
       <p class="text-center small text-muted mb-0">

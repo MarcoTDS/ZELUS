@@ -39,7 +39,7 @@ class MoradorResponse(BaseModel):
 class VinculoRemovidoResponse(BaseModel):
     # RF21: "Remover da unidade" na Tela de Moradores
     id: int
-    usuario_inativado: bool # True quando o morador não tinha outra unidade (o acesso dele foi bloqueado)
+    usuario_inativado: bool # True quando o morador não tinha outra unidade (acesso bloqueado até pedir nova unidade pelo cadastro)
 
 class CadastroMoradorResponse(BaseModel):
     # RF05, RF06: Resposta da Tela de Cadastro
