@@ -4,7 +4,7 @@ import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
 import { ROTAS } from "../shared/config.js";
 import { atualizarPeriodicamente } from "../shared/atualizacao.js";
-import { mostrarAlerta, limparAlerta, mostrarAvisoPendente, definirCarregando } from "../shared/ui.js";
+import { mostrarAlerta, limparAlerta, mostrarAvisoPendente, definirCarregando, confirmar } from "../shared/ui.js";
 
 const usuario = await protegerPagina({ perfis: ["Sindico"] });
 montarCabecalho(usuario);
@@ -32,7 +32,11 @@ function liberarSaida(chamadosEmAberto) {
 }
 
 botaoSair.addEventListener("click", async () => {
-    if (!confirm("Sair do condomínio?\n\nSeu acesso como síndico será encerrado e o condomínio ficará sem síndico até o administrador cadastrar outro.")) return;
+    if (!(await confirmar({
+        titulo: "Sair do condomínio?",
+        mensagem: "Seu acesso como síndico será encerrado e o condomínio ficará sem síndico até o administrador cadastrar outro.",
+        textoConfirmar: "Sair do condomínio"
+    }))) return;
 
     limparAlerta(alerta);
     definirCarregando(botaoSair, true, "Saindo...");

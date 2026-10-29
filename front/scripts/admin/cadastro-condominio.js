@@ -5,7 +5,7 @@ import { api } from "../shared/api.js";
 import { ROTAS } from "../shared/config.js";
 import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
-import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml, avisarNaProximaTela } from "../shared/ui.js";
+import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml, avisarNaProximaTela, confirmar } from "../shared/ui.js";
 import { buscarEnderecoPorCep } from "../shared/cep.js";
 
 const usuario = await protegerPagina({ perfis: ["Administrador"] });
@@ -193,7 +193,11 @@ async function removerUnidade(indice) {
     const unidade = unidades[indice];
 
     if (modoEdicao) {
-        if (!confirm(`Inativar a unidade "${unidade.identificacao}"?`)) return;
+        if (!(await confirmar({
+            titulo: "Inativar unidade?",
+            mensagem: `A unidade "${unidade.identificacao}" será inativada.`,
+            textoConfirmar: "Inativar"
+        }))) return;
         try {
             await api(`/admin/condominios/${idCondominio}/unidades/${unidade.id}/inativar`, { metodo: "PATCH" });
         } catch (erro) {

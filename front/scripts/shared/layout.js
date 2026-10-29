@@ -156,7 +156,7 @@ export function montarCabecalho(usuario) {
         .map((item) => item.itens ? montarGrupo(item) : montarLink(item))
         .join("");
 
-    // Menu de links é opcional: na pré-banca o cabeçalho tem só logo, usuário e tema
+    // Menu de links é opcional: por padrão o cabeçalho tem só logo, usuário e tema
     // (a navegação é feita pelos atalhos de cada dashboard).
     const menuLinks = itens ? `
         <ul class="navbar-nav flex-row gap-3 me-auto ms-4 d-none d-md-flex">${itens}</ul>` : "";

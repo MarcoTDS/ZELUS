@@ -2,7 +2,7 @@
 import { api } from "../shared/api.js";
 import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
-import { mostrarAlerta, limparAlerta, mostrarAvisoPendente, escaparHtml, definirCarregando } from "../shared/ui.js";
+import { mostrarAlerta, limparAlerta, mostrarAvisoPendente, escaparHtml, definirCarregando, confirmar } from "../shared/ui.js";
 import { mostrarAcessoSindico } from "./acesso-sindico.js";
 import { atualizarPeriodicamente } from "../shared/atualizacao.js";
 
@@ -99,7 +99,11 @@ async function carregarCondominios({ silencioso = false } = {}) {
 }
 
 async function inativar(botao) {
-    if (!confirm(`Inativar o condomínio "${botao.dataset.nome}"? As unidades e categorias dele também serão inativadas.`)) return;
+    if (!(await confirmar({
+        titulo: "Inativar condomínio?",
+        mensagem: `O condomínio "${botao.dataset.nome}" será inativado. As unidades e categorias dele também serão inativadas.`,
+        textoConfirmar: "Inativar"
+    }))) return;
 
     limparAlerta(alerta);
     try {
@@ -113,7 +117,12 @@ async function inativar(botao) {
 
 // Desfaz a inativação: o condomínio, as unidades e as categorias voltam a ficar ativos (sem síndico)
 async function reativar(botao) {
-    if (!confirm(`Reativar o condomínio "${botao.dataset.nome}"?\n\nAs unidades e categorias dele voltam a ficar ativas. O condomínio volta sem síndico: cadastre um novo depois.`)) return;
+    if (!(await confirmar({
+        titulo: "Reativar condomínio?",
+        mensagem: `As unidades e categorias de "${botao.dataset.nome}" voltam a ficar ativas. O condomínio volta sem síndico: cadastre um novo depois.`,
+        textoConfirmar: "Reativar",
+        perigo: false
+    }))) return;
 
     limparAlerta(alerta);
     definirCarregando(botao, true, "");
@@ -130,7 +139,11 @@ async function reativar(botao) {
 // RN07: tira o síndico do condomínio (troca de síndico ou encerramento). O acesso do síndico é bloqueado.
 async function desvincularSindico(botao) {
     const { id, nome, sindico } = botao.dataset;
-    if (!confirm(`Desvincular ${sindico} do condomínio "${nome}"?\n\nO acesso de ${sindico} ao sistema será bloqueado e o condomínio ficará sem síndico até você cadastrar outro.\n\nSe a ideia é inativar o condomínio, peça antes ao síndico para remover os moradores das unidades e encerrar os chamados em aberto.`)) return;
+    if (!(await confirmar({
+        titulo: "Desvincular síndico?",
+        mensagem: `${sindico} será desvinculado do condomínio "${nome}". O acesso de ${sindico} ao sistema será bloqueado e o condomínio ficará sem síndico até você cadastrar outro.\n\nSe a ideia é inativar o condomínio, peça antes ao síndico para remover os moradores das unidades e encerrar os chamados em aberto.`,
+        textoConfirmar: "Desvincular"
+    }))) return;
 
     limparAlerta(alerta);
     try {

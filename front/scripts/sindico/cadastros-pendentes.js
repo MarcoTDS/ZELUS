@@ -2,7 +2,7 @@
 import { api } from "../shared/api.js";
 import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
-import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml } from "../shared/ui.js";
+import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml, confirmar } from "../shared/ui.js";
 import { formatarDataHora } from "../shared/formatos.js";
 import { atualizarPeriodicamente } from "../shared/atualizacao.js";
 
@@ -66,7 +66,11 @@ async function avaliar(botao, aprovado) {
     const vinculo = pendentes.find((v) => v.id === Number(cartao.dataset.id));
     const nome = vinculo.usuario.nome;
 
-    if (!aprovado && !confirm(`Rejeitar o cadastro de ${nome} na unidade ${vinculo.unidade.identificacao}?`)) return;
+    if (!aprovado && !(await confirmar({
+        titulo: "Rejeitar cadastro?",
+        mensagem: `O cadastro de ${nome} na unidade ${vinculo.unidade.identificacao} será rejeitado.`,
+        textoConfirmar: "Rejeitar"
+    }))) return;
 
     limparAlerta(alerta);
     avaliando = true;

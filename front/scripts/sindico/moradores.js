@@ -6,7 +6,7 @@ import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
 import { ROTAS } from "../shared/config.js";
 import { atualizarPeriodicamente } from "../shared/atualizacao.js";
-import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml } from "../shared/ui.js";
+import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml, confirmar } from "../shared/ui.js";
 
 const usuario = await protegerPagina({ perfis: ["Sindico"] });
 montarCabecalho(usuario);
@@ -113,10 +113,18 @@ async function carregarMoradores({ silencioso = false } = {}) {
 }
 
 async function alterarSituacao(morador, ativar) {
-    const pergunta = ativar
-        ? `Reativar ${morador.nome}? O acesso ao sistema volta a ser liberado.`
-        : `Inativar ${morador.nome}? O acesso ao sistema será bloqueado, mas os chamados abertos continuam no histórico.`;
-    if (!confirm(pergunta)) return;
+    if (!(await confirmar(ativar
+        ? {
+            titulo: "Reativar morador?",
+            mensagem: `O acesso de ${morador.nome} ao sistema volta a ser liberado.`,
+            textoConfirmar: "Reativar",
+            perigo: false
+        }
+        : {
+            titulo: "Inativar morador?",
+            mensagem: `O acesso de ${morador.nome} ao sistema será bloqueado, mas os chamados abertos continuam no histórico.`,
+            textoConfirmar: "Inativar"
+        }))) return;
 
     limparAlerta(alerta);
     try {

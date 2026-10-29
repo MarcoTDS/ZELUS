@@ -2,7 +2,7 @@
 import { api } from "../shared/api.js";
 import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
-import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml } from "../shared/ui.js";
+import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml, confirmar } from "../shared/ui.js";
 import { atualizarPeriodicamente } from "../shared/atualizacao.js";
 
 const usuario = await protegerPagina({ perfis: ["Morador"] });
@@ -93,10 +93,19 @@ lista.addEventListener("click", async (evento) => {
     if (!botao) return;
 
     const vinculo = vinculos.find((v) => v.id === Number(botao.dataset.id));
-    const pergunta = vinculo.status_aprovacao === "Aprovado"
-        ? `Sair da Unidade ${vinculo.unidade.identificacao}?\n\nVocê não poderá mais abrir chamados para ela. Os chamados já abertos continuam no histórico.`
-        : `Cancelar a solicitação da Unidade ${vinculo.unidade.identificacao}?`;
-    if (vinculo.status_aprovacao !== "Rejeitado" && !confirm(pergunta)) return;
+    const aprovado = vinculo.status_aprovacao === "Aprovado";
+    if (vinculo.status_aprovacao !== "Rejeitado" && !(await confirmar(aprovado
+        ? {
+            titulo: "Sair da unidade?",
+            mensagem: `Você deixará a Unidade ${vinculo.unidade.identificacao} e não poderá mais abrir chamados para ela. Os chamados já abertos continuam no histórico.`,
+            textoConfirmar: "Sair da unidade"
+        }
+        : {
+            titulo: "Cancelar solicitação?",
+            mensagem: `Cancelar a solicitação da Unidade ${vinculo.unidade.identificacao}?`,
+            textoConfirmar: "Cancelar solicitação",
+            textoCancelar: "Voltar"
+        }))) return;
 
     limparAlerta(alerta);
     definirCarregando(botao, true, "");

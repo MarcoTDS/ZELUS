@@ -2,7 +2,7 @@
 import { api } from "../shared/api.js";
 import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
-import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml } from "../shared/ui.js";
+import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml, confirmar } from "../shared/ui.js";
 import { atualizarPeriodicamente } from "../shared/atualizacao.js";
 
 const usuario = await protegerPagina({ perfis: ["Sindico"] });
@@ -118,7 +118,11 @@ async function carregarUnidades({ silencioso = false } = {}) {
 }
 
 async function inativar(unidade) {
-    if (!confirm(`Remover a unidade "${unidade.identificacao}"? Ela deixa de aparecer no cadastro de moradores e na abertura de chamados.`)) return;
+    if (!(await confirmar({
+        titulo: "Remover unidade?",
+        mensagem: `A unidade "${unidade.identificacao}" deixa de aparecer no cadastro de moradores e na abertura de chamados.`,
+        textoConfirmar: "Remover"
+    }))) return;
 
     limparAlerta(alerta);
     try {

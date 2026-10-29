@@ -49,23 +49,14 @@ export const ROTAS = {
         perfil: "/views/comum/perfil.html",
         alterarSenha: "/views/comum/alterar-senha.html"
     }
-
-    // Fora da pré-banca (voltam aqui quando as telas forem refeitas):
-    // esqueciSenha,
-    // comum.mural, comum.perfil, comum.alterarSenha
 };
 
 // ==========================================
-// MENU DA NAVBAR POR PERFIL
-// ==========================================
-// Cada item é um link { texto, icone, rota } ou um grupo { texto, icone, itens: [...] }.
-// Ícones: nomes do Bootstrap Icons (https://icons.getbootstrap.com).
-// ==========================================
 // MENU DE LINKS NO CABEÇALHO (opcional)
 // ==========================================
-// Na pré-banca o cabeçalho não mostra links: só logo, usuário e tema.
-// Para exibir links ao lado da logo, preencha a lista do perfil. Cada item é
-// { texto, icone, rota } ou um grupo { texto, icone, itens: [...] }.
+// Por padrão o cabeçalho mostra só logo, usuário e tema: a navegação é feita pelos
+// atalhos de cada dashboard. Para exibir links ao lado da logo, preencha a lista do perfil.
+// Cada item é um link { texto, icone, rota } ou um grupo { texto, icone, itens: [...] }.
 // Ícones: nomes do Bootstrap Icons (https://icons.getbootstrap.com).
 // Exemplo:
 //   Sindico: [

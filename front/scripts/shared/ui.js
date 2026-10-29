@@ -39,6 +39,60 @@ export function definirCarregando(botao, carregando, textoCarregando = "Aguarde.
     }
 }
 
+// ==========================================
+// JANELA DE CONFIRMAÇÃO
+// ==========================================
+// Substitui o confirm() do navegador por uma janela no centro da tela, no padrão do sistema.
+// Uso: if (!(await confirmar({ titulo: "Inativar?", mensagem: "...", textoConfirmar: "Inativar" }))) return;
+// Devolve true se a pessoa confirmou, false se cancelou ou fechou a janela.
+// "perigo" deixa o botão de confirmar vermelho (ações que bloqueiam, removem ou travam algo).
+let janelaConfirmacao = null;
+
+function montarJanelaConfirmacao() {
+    if (janelaConfirmacao) return janelaConfirmacao;
+
+    document.body.insertAdjacentHTML("beforeend", `
+        <div class="modal fade" id="modal-confirmar" tabindex="-1" aria-labelledby="titulo-confirmar" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header border-0 pb-0">
+                        <h2 class="modal-title h5 fw-semibold" id="titulo-confirmar"></h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="small texto-suave mb-0" id="mensagem-confirmar" style="white-space: pre-line;"></p>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary" id="btn-cancelar-confirmar" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn" id="btn-confirmar-confirmar"></button>
+                    </div>
+                </div>
+            </div>
+        </div>`);
+
+    const elemento = document.getElementById("modal-confirmar");
+    janelaConfirmacao = { elemento, modal: new bootstrap.Modal(elemento) };
+    return janelaConfirmacao;
+}
+
+export function confirmar({ titulo, mensagem, textoConfirmar = "Confirmar", textoCancelar = "Cancelar", perigo = true }) {
+    const { elemento, modal } = montarJanelaConfirmacao();
+
+    elemento.querySelector("#titulo-confirmar").textContent = titulo;
+    elemento.querySelector("#mensagem-confirmar").textContent = mensagem;
+    elemento.querySelector("#btn-cancelar-confirmar").textContent = textoCancelar;
+    const botao = elemento.querySelector("#btn-confirmar-confirmar");
+    botao.textContent = textoConfirmar;
+    botao.className = `btn ${perigo ? "btn-danger" : "btn-zelus"}`;
+
+    return new Promise((resolver) => {
+        let confirmado = false;
+        botao.onclick = () => { confirmado = true; modal.hide(); };
+        elemento.addEventListener("hidden.bs.modal", () => resolver(confirmado), { once: true });
+        modal.show();
+    });
+}
+
 // Escapa textos vindos da API antes de montar HTML com template strings (evita injeção de HTML)
 export function escaparHtml(texto) {
     const div = document.createElement("div");

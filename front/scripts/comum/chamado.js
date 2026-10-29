@@ -3,7 +3,7 @@
 import { api } from "../shared/api.js";
 import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
-import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml } from "../shared/ui.js";
+import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml, confirmar } from "../shared/ui.js";
 import { formatarDataHora, descreverPrazo, lerDataApi } from "../shared/formatos.js";
 import { ROTAS, API_URL } from "../shared/config.js";
 import { atualizarPeriodicamente } from "../shared/atualizacao.js";
@@ -202,8 +202,12 @@ form.addEventListener("submit", async (evento) => {
     }
 
     // Resolvido / Cancelado travam o chamado (RN06): confirma antes
-    if (finalizado(novoStatus.value) &&
-        !confirm(`Marcar como "${novoStatus.value}"? Depois disso o status não poderá mais ser alterado.`)) {
+    if (finalizado(novoStatus.value) && !(await confirmar({
+        titulo: `Marcar como ${novoStatus.value}?`,
+        mensagem: "Depois disso o status não poderá mais ser alterado.",
+        textoConfirmar: `Marcar como ${novoStatus.value}`,
+        perigo: novoStatus.value === "Cancelado"
+    }))) {
         return;
     }
 

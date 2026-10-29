@@ -2,7 +2,7 @@
 import { api } from "../shared/api.js";
 import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
-import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml } from "../shared/ui.js";
+import { mostrarAlerta, limparAlerta, definirCarregando, escaparHtml, confirmar } from "../shared/ui.js";
 import { formatarPrazoSla } from "../shared/formatos.js";
 
 const usuario = await protegerPagina({ perfis: ["Sindico"] });
@@ -123,7 +123,11 @@ btnCancelar.addEventListener("click", limparFormulario);
 // AÇÕES DA LISTA
 // ==========================================
 async function alterarSituacao(categoria, ativar) {
-    if (!ativar && !confirm(`Inativar a categoria "${categoria.nome}"? Ela deixa de aparecer na abertura de chamados.`)) return;
+    if (!ativar && !(await confirmar({
+        titulo: "Inativar categoria?",
+        mensagem: `A categoria "${categoria.nome}" deixa de aparecer na abertura de chamados.`,
+        textoConfirmar: "Inativar"
+    }))) return;
 
     limparAlerta(alerta);
     try {
