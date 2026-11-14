@@ -17,15 +17,16 @@ FILTRO_TICKET = Query(None, description="Busca por número do ticket")
 TipoAnexo = Literal["foto", "video"]
 
 # ==========================================
-# MORADOR
+# ABERTURA (MORADOR E SÍNDICO)
 # ==========================================
 @router_chamados.post("/", response_model=ChamadoCriadoComAviso, status_code=status.HTTP_201_CREATED, summary="RF07 - Abrir Chamado")
-def abrir_chamado(chamado_dados: ChamadoCreate, db: Session = Depends(get_db), usuario: dict = Depends(get_morador)):
-    """RF07, RN01, RN05, RN09 - O morador registra o chamado e herda o SLA da categoria."""
-    return chamado_service.criar_chamado(db, chamado_dados, usuario["id"], usuario["id_condominio"])
+def abrir_chamado(chamado_dados: ChamadoCreate, db: Session = Depends(get_db), usuario: dict = Depends(get_morador_ou_sindico)):
+    """RF07, RN01, RN05, RN09 - Registra o chamado e herda o SLA da categoria.
+    Aberto pelo síndico: qualquer unidade do condomínio, fica marcado como "aberto pelo síndico" e aparece para os moradores."""
+    return chamado_service.criar_chamado(db, chamado_dados, usuario)
 
 @router_chamados.get("/similaridade", response_model=SimilaridadeResponse, summary="RN09 - Verificar chamado semelhante")
-def verificar_similaridade(id_categoria: int, id_unidade: int, db: Session = Depends(get_db), usuario: dict = Depends(get_morador)):
+def verificar_similaridade(id_categoria: int, id_unidade: int, db: Session = Depends(get_db), usuario: dict = Depends(get_morador_ou_sindico)):
     """Permite exibir o aviso na Tela de Novo Chamado antes do envio."""
     similar = chamado_service.verificar_similaridade(db, usuario["id"], id_categoria, id_unidade)
     return {"existe_similar": similar is not None, "id_chamado": similar.id if similar else None}
@@ -35,9 +36,18 @@ def listar_meus_chamados(ticket: Optional[int] = FILTRO_TICKET, db: Session = De
     return chamado_service.listar_meus_chamados(db, usuario["id"], ticket)
 
 @router_chamados.post("/{id_chamado}/anexos/{tipo}", response_model=AnexoEnviadoResponse, status_code=status.HTTP_201_CREATED, summary="RF07 - Anexar foto ou vídeo")
-def anexar_arquivo(id_chamado: int, tipo: TipoAnexo, arquivo: UploadFile = File(...), db: Session = Depends(get_db), usuario: dict = Depends(get_morador)):
+def anexar_arquivo(id_chamado: int, tipo: TipoAnexo, arquivo: UploadFile = File(...), db: Session = Depends(get_db), usuario: dict = Depends(get_morador_ou_sindico)):
     """Enviado logo após abrir o chamado. Foto: JPG, PNG ou WEBP até 5 MB. Vídeo: MP4, MOV ou WEBM até 50 MB."""
     return anexo_service.salvar_anexo(db, id_chamado, tipo, arquivo, usuario)
+
+@router_chamados.get("/do-sindico", response_model=List[ChamadoResponse], summary="Chamados abertos pelo síndico")
+def listar_chamados_do_sindico(
+    somente_em_aberto: bool = Query(False, description="True: só Aberto e Em Andamento"),
+    db: Session = Depends(get_db),
+    usuario: dict = Depends(get_morador_ou_sindico)
+):
+    """Demandas registradas pelo síndico, exibidas no Dashboard do Morador para que ele fique ciente."""
+    return chamado_service.listar_do_sindico(db, usuario["id_condominio"], somente_em_aberto)
 
 @router_chamados.get("/mural", response_model=List[ChamadoResponse], summary="RF17 - Mural do Condomínio")
 def visualizar_mural(ticket: Optional[int] = FILTRO_TICKET, db: Session = Depends(get_db), usuario: dict = Depends(get_morador_ou_sindico)):

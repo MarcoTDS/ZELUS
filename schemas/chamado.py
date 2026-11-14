@@ -6,11 +6,11 @@ from schemas.unidade import UnidadeResumo
 from typing import List, Literal, Optional
 
 class ChamadoCreate(BaseModel):
-    # RF07: O autor é o morador logado e o SLA é herdado da categoria (RN01)
+    # RF07: O autor é o usuário logado (morador ou síndico) e o SLA é herdado da categoria (RN01)
     titulo: str = Field(..., min_length=3, max_length=150)
     descricao: str = Field(..., min_length=3)
     id_categoria: int
-    id_unidade_destino: int = Field(..., description="Unidade do morador ou área comum (RN05)")
+    id_unidade_destino: int = Field(..., description="Morador: unidade dele ou área comum (RN05). Síndico: qualquer unidade do condomínio")
     # Foto e vídeo não vêm aqui: são enviados como arquivo em POST /chamados/{id}/anexos/{tipo}
 
 class AutorResumo(BaseModel):
@@ -32,6 +32,7 @@ class ChamadoResponse(BaseModel):
     id_categoria: int
     categoria: CategoriaResumo
     unidade: UnidadeResumo
+    aberto_pelo_sindico: bool = False # Marcação "Aberto pelo síndico" nas listas e no detalhe
     vencido: bool = False
     urgencia: Optional[Literal["Vencido", "Alta", "Media", "Baixa"]] = None # RN04: Cor exibida (None se finalizado)
 

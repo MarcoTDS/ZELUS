@@ -141,7 +141,7 @@ async function desvincularSindico(botao) {
     const { id, nome, sindico } = botao.dataset;
     if (!(await confirmar({
         titulo: "Desvincular síndico?",
-        mensagem: `${sindico} será desvinculado do condomínio "${nome}". O acesso de ${sindico} ao sistema será bloqueado e o condomínio ficará sem síndico até você cadastrar outro.\n\nSe a ideia é inativar o condomínio, peça antes ao síndico para remover os moradores das unidades e encerrar os chamados em aberto.`,
+        mensagem: `${sindico} será desvinculado do condomínio "${nome}". Se ${sindico} também for morador do condomínio, volta a ser morador; senão, o acesso dele ao sistema será bloqueado. O condomínio ficará sem síndico até você cadastrar outro.\n\nSe a ideia é inativar o condomínio, peça antes ao síndico para remover os moradores das unidades e encerrar os chamados em aberto.`,
         textoConfirmar: "Desvincular"
     }))) return;
 

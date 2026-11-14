@@ -67,12 +67,26 @@ class SindicoCreate(BaseModel):
     nome: str = Field(..., min_length=3, max_length=150)
     email: EmailStr
 
+class SindicoPromocao(BaseModel):
+    # RF13: Em vez de criar um usuário novo, o administrador promove um morador do condomínio a síndico
+    id_condominio: int = Field(..., description="Condomínio do qual o síndico será responsável (RN07)")
+    id_usuario: int = Field(..., description="Morador do próprio condomínio que passará a ser o síndico")
+
+class MoradorElegivelResponse(BaseModel):
+    # Lista "Escolher entre os moradores" da Tela de Cadastro de Síndico
+    id: int
+    nome: str
+    email: EmailStr
+    unidades: List[str] # Identificação das unidades aprovadas (ex: "Bloco A, Apto 21")
+
 class SindicoCriadoResponse(BaseModel):
     id_usuario: int
     nome: str
     email: EmailStr
     id_condominio: Optional[int] = None
     # Também enviados por e-mail ao síndico (RN12, RN13). Ficam no response para o caso de o envio falhar.
-    senha_provisoria: str
-    link_validacao: str
+    # Morador promovido: continua com o e-mail já validado e a senha dele, então os dois vêm vazios.
+    senha_provisoria: Optional[str] = None
+    link_validacao: Optional[str] = None
     email_enviado: bool = False # True quando o servidor SMTP aceitou o e-mail
+    promovido: bool = False     # True quando um morador do condomínio foi promovido a síndico

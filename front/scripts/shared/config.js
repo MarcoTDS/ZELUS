@@ -39,13 +39,13 @@ export const ROTAS = {
 
     // Morador
     morador: {
-        novoChamado: "/views/morador/novo-chamado.html",
         unidades: "/views/morador/unidades.html"
     },
 
     // Telas compartilhadas entre perfis
     comum: {
         chamado: "/views/comum/chamado.html",      // abre com ?id=N
+        novoChamado: "/views/comum/novo-chamado.html", // morador e síndico
         perfil: "/views/comum/perfil.html",
         alterarSenha: "/views/comum/alterar-senha.html"
     }

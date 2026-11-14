@@ -38,7 +38,8 @@ voltar.innerHTML = `<i class="bi bi-arrow-left"></i> ${ehSindico ? "Voltar" : "V
 if (ehSindico) {
     $("linha-solicitante").classList.remove("d-none");
     form.classList.remove("d-none");
-} else if (parametros.get("novo")) {
+}
+if (parametros.get("novo")) {
     $("aviso-novo").classList.remove("d-none");
 }
 
@@ -127,9 +128,15 @@ function preencherTela(chamado) {
 
     $("aberto-em").textContent = `Aberto em ${formatarDataHora(chamado.data_abertura)}`;
 
+    // Chamado do próprio síndico: mostra a marcação no lugar do "Visto" (quem abriu já viu)
+    $("aberto-pelo-sindico").classList.toggle("d-none", !chamado.aberto_pelo_sindico);
+
     // RN10: o "Visto" é registrado pelo back quando o síndico abre o chamado
     const visto = $("visto");
-    if (chamado.data_visto) {
+    if (chamado.aberto_pelo_sindico) {
+        visto.classList.add("d-none");
+        $("nao-visto").classList.add("d-none");
+    } else if (chamado.data_visto) {
         visto.textContent = `✓ Visto ${ehSindico ? "por você" : "pelo síndico"} em ${formatarDataHora(chamado.data_visto)}`;
         visto.classList.remove("d-none");
         $("nao-visto").classList.add("d-none");

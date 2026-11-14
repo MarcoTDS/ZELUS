@@ -109,6 +109,9 @@ def listar_minhas_unidades(db: Session = Depends(get_db), usuario_atual: dict = 
 
 @router_auth.patch("/me/sair-do-condominio", response_model=MensagemResponse, summary="RN07, RN18 - Síndico sai do condomínio")
 def sindico_sair_do_condominio(db: Session = Depends(get_db), usuario_atual: dict = Depends(get_sindico)):
-    """Bloqueado enquanto houver chamados Aberto ou Em Andamento. Depois de sair, o acesso do síndico é encerrado."""
+    """Bloqueado enquanto houver chamados Aberto ou Em Andamento. Depois de sair, o acesso como síndico é encerrado
+    (quem foi promovido e ainda tem unidade no condomínio volta a entrar como morador)."""
     admin_service.sindico_sair_do_condominio(db, usuario_atual["id_condominio"])
+    if usuario_service.buscar_por_id(db, usuario_atual["id"]):
+        return {"mensagem": "Você saiu do cargo de síndico e voltou a acessar o sistema como morador."}
     return {"mensagem": "Você saiu do condomínio. O administrador vai cadastrar um novo síndico."}

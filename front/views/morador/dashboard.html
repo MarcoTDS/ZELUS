@@ -32,7 +32,7 @@
 
     <!-- Atalhos -->
     <div class="d-grid gap-2 mb-4">
-      <a href="novo-chamado.html" class="btn-atalho">
+      <a href="../comum/novo-chamado.html" class="btn-atalho">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="10"/>
           <line x1="12" y1="8" x2="12" y2="16"/>
@@ -81,6 +81,16 @@
     <!-- Lista preenchida pelo script, com os dados do banco -->
     <div id="lista-chamados">
       <p class="texto-suave">Carregando chamados...</p>
+    </div>
+
+    <!-- Demandas registradas pelo síndico (em aberto), para o morador ficar ciente -->
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+      <h2 class="h6 fw-semibold mb-0">Demandas do Síndico</h2>
+      <a href="mural.html?filtro=sindico" class="small link-zelus">Ver todas no mural</a>
+    </div>
+    <p class="small texto-suave mb-2">Chamados abertos pelo síndico e ainda não concluídos.</p>
+    <div id="lista-sindico">
+      <p class="texto-suave">Carregando...</p>
     </div>
 
   </main>

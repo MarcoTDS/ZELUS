@@ -7,11 +7,8 @@ from models.usuario import UsuarioDB
 from models.enums import TipoUnidadeEnum, PerfilUsuarioEnum
 from schemas.vinculo import VinculoCreate
 
-# ==========================================
-# CONSULTAS DE APOIO (usadas por outros services)
-# ==========================================
+
 def obter_responsavel_unidade(db: Session, id_unidade: int, ignorar_id_usuario: int = None):
-    # RN11/RN17: Morador ativo com vínculo aprovado na unidade
     query = db.query(UsuarioDB).join(VinculoMoradorDB, VinculoMoradorDB.id_usuario == UsuarioDB.id).filter(
         VinculoMoradorDB.id_unidade == id_unidade,
         VinculoMoradorDB.status_aprovacao == StatusVinculoEnum.Aprovado,
@@ -23,7 +20,6 @@ def obter_responsavel_unidade(db: Session, id_unidade: int, ignorar_id_usuario: 
     return query.first()
 
 def obter_status_vinculo(db: Session, id_usuario: int):
-    # Situação do morador: "Aprovado" se tiver alguma unidade aprovada; senão "Pendente" ou "Rejeitado"
     status = {v.status_aprovacao for v in db.query(VinculoMoradorDB).filter(
         VinculoMoradorDB.id_usuario == id_usuario,
         VinculoMoradorDB.ativo == True
@@ -35,7 +31,6 @@ def obter_status_vinculo(db: Session, id_usuario: int):
     return None
 
 def obter_id_condominio_do_morador(db: Session, id_usuario: int):
-    # Prioriza o condomínio de um vínculo aprovado; senão, o da solicitação pendente
     vinculos = db.query(VinculoMoradorDB).join(UnidadeDB).filter(
         VinculoMoradorDB.id_usuario == id_usuario,
         VinculoMoradorDB.ativo == True,
@@ -46,7 +41,6 @@ def obter_id_condominio_do_morador(db: Session, id_usuario: int):
     return vinculos[0].unidade.id_condominio if vinculos else None
 
 def listar_unidades_do_morador(db: Session, id_usuario: int):
-    # Unidades com vínculo aprovado (onde o morador pode abrir chamados - RN05)
     return db.query(UnidadeDB).join(VinculoMoradorDB).filter(
         VinculoMoradorDB.id_usuario == id_usuario,
         VinculoMoradorDB.status_aprovacao == StatusVinculoEnum.Aprovado,
@@ -55,8 +49,6 @@ def listar_unidades_do_morador(db: Session, id_usuario: int):
     ).all()
 
 def morador_sem_unidade(db: Session, usuario: UsuarioDB) -> bool:
-    # Morador sem unidade aprovada nem solicitação pendente: removido de todas as unidades ou só com solicitações rejeitadas.
-    # Pode reaproveitar a conta na Tela de Cadastro para pedir uma nova unidade (RF06, RN11).
     if usuario.perfil != PerfilUsuarioEnum.Morador:
         return False
     return db.query(VinculoMoradorDB).filter(
@@ -66,17 +58,14 @@ def morador_sem_unidade(db: Session, usuario: UsuarioDB) -> bool:
     ).first() is None
 
 def morador_pertence_ao_condominio(db: Session, id_usuario: int, id_condominio: int) -> bool:
-    return db.query(VinculoMoradorDB).join(UnidadeDB).filter(
+    return db.query(VinculoMoradorDB).join(UnidadeDB).join(UsuarioDB, VinculoMoradorDB.id_usuario == UsuarioDB.id).filter(
+        UsuarioDB.perfil == PerfilUsuarioEnum.Morador,
         VinculoMoradorDB.id_usuario == id_usuario,
         VinculoMoradorDB.ativo == True,
         UnidadeDB.id_condominio == id_condominio
     ).first() is not None
 
-# ==========================================
-# SOLICITAÇÃO E AVALIAÇÃO DE VÍNCULOS
-# ==========================================
 def criar_solicitacao(db: Session, id_usuario: int, id_unidade: int):
-    # Não faz commit: usado também no cadastro do morador (usuário + vínculo na mesma transação)
     unidade = db.query(UnidadeDB).join(CondominioDB).filter(
         UnidadeDB.id == id_unidade,
         UnidadeDB.ativo == True,
@@ -88,12 +77,10 @@ def criar_solicitacao(db: Session, id_usuario: int, id_unidade: int):
     if unidade.tipo_unidade == TipoUnidadeEnum.Area_Comum:
         raise HTTPException(status_code=400, detail="Não é possível solicitar vínculo com uma área comum.")
 
-    # RF06: O morador pode ter várias unidades, mas todas do mesmo condomínio (RN14)
     id_condominio_atual = obter_id_condominio_do_morador(db, id_usuario)
     if id_condominio_atual is not None and id_condominio_atual != unidade.id_condominio:
         raise HTTPException(status_code=400, detail="Todas as unidades devem ser do mesmo condomínio.")
 
-    # O banco permite apenas um vínculo ativo por morador/unidade (índice uq_usuario_unidade_ativo)
     vinculo_existente = db.query(VinculoMoradorDB).filter(
         VinculoMoradorDB.id_usuario == id_usuario,
         VinculoMoradorDB.id_unidade == id_unidade,
@@ -103,7 +90,6 @@ def criar_solicitacao(db: Session, id_usuario: int, id_unidade: int):
     if vinculo_existente:
         if vinculo_existente.status_aprovacao != StatusVinculoEnum.Rejeitado:
             raise HTTPException(status_code=409, detail="Já existe uma solicitação pendente ou aprovada para esta unidade.")
-        # Uma solicitação rejeitada é inativada para permitir um novo pedido
         vinculo_existente.ativo = False
         db.flush()
 
@@ -116,21 +102,18 @@ def criar_solicitacao(db: Session, id_usuario: int, id_unidade: int):
     return novo_vinculo
 
 def solicitar_vinculo(db: Session, id_usuario: int, dados: VinculoCreate):
-    # RF06: Morador já cadastrado solicita vínculo com (outra) unidade
     novo_vinculo = criar_solicitacao(db, id_usuario, dados.id_unidade)
     db.commit()
     db.refresh(novo_vinculo)
     return novo_vinculo
 
 def listar_vinculos_do_morador(db: Session, id_usuario: int):
-    # Tela "Minhas unidades": unidades aprovadas, pendentes e rejeitadas do próprio morador
     return db.query(VinculoMoradorDB).filter(
         VinculoMoradorDB.id_usuario == id_usuario,
         VinculoMoradorDB.ativo == True
     ).order_by(VinculoMoradorDB.data_solicitacao).all()
 
 def encerrar_vinculo_do_morador(db: Session, id_vinculo: int, id_usuario: int):
-    # Morador sai de uma unidade ou cancela uma solicitação (soft delete, RN08)
     vinculo = db.query(VinculoMoradorDB).filter(
         VinculoMoradorDB.id == id_vinculo,
         VinculoMoradorDB.id_usuario == id_usuario,
@@ -139,7 +122,6 @@ def encerrar_vinculo_do_morador(db: Session, id_vinculo: int, id_usuario: int):
     if not vinculo:
         return None
 
-    # A última unidade aprovada mantém o acesso do morador; a saída do condomínio é feita pelo síndico (RF21)
     if vinculo.status_aprovacao == StatusVinculoEnum.Aprovado and len(listar_unidades_do_morador(db, id_usuario)) <= 1:
         raise HTTPException(status_code=400, detail="Esta é a sua única unidade aprovada. Para deixar o condomínio, procure o síndico.")
 
@@ -149,16 +131,15 @@ def encerrar_vinculo_do_morador(db: Session, id_vinculo: int, id_usuario: int):
     return vinculo
 
 def listar_pendentes(db: Session, id_condominio: int):
-    # RF11: Vínculos pendentes das unidades do condomínio do síndico
     pendentes = db.query(VinculoMoradorDB).join(UnidadeDB).join(UsuarioDB, VinculoMoradorDB.id_usuario == UsuarioDB.id).filter(
         VinculoMoradorDB.status_aprovacao == StatusVinculoEnum.Pendente,
         VinculoMoradorDB.ativo == True,
         UnidadeDB.id_condominio == id_condominio,
         UnidadeDB.ativo == True,
-        UsuarioDB.ativo == True
+        UsuarioDB.ativo == True,
+        UsuarioDB.perfil == PerfilUsuarioEnum.Morador # o síndico não aprova o próprio pedido
     ).order_by(VinculoMoradorDB.data_solicitacao).all()
 
-    # RN11: Aviso quando a unidade já possui um morador responsável (atributo dinâmico, não persistido)
     for vinculo in pendentes:
         responsavel = obter_responsavel_unidade(db, vinculo.id_unidade, ignorar_id_usuario=vinculo.id_usuario)
         vinculo.responsavel_atual = responsavel.nome if responsavel else None
@@ -177,7 +158,6 @@ def avaliar_vinculo(db: Session, id_vinculo: int, id_condominio: int, aprovado: 
     if vinculo.status_aprovacao != StatusVinculoEnum.Pendente:
         raise HTTPException(status_code=400, detail="Este vínculo já foi avaliado.")
         
-    # RN11: O síndico pode "aprovar mesmo assim" quando a unidade já possui responsável
     vinculo.status_aprovacao = StatusVinculoEnum.Aprovado if aprovado else StatusVinculoEnum.Rejeitado
     vinculo.data_avaliacao = datetime.utcnow()
     
@@ -185,21 +165,17 @@ def avaliar_vinculo(db: Session, id_vinculo: int, id_condominio: int, aprovado: 
     db.refresh(vinculo)
     return vinculo
 
-# ==========================================
-# GERENCIAMENTO DE MORADORES (RF21)
-# ==========================================
 def listar_moradores(db: Session, id_condominio: int):
-    # Vínculos aprovados do condomínio, incluindo moradores inativados (exibidos como "Inativo")
     return db.query(VinculoMoradorDB).join(UnidadeDB).join(UsuarioDB, VinculoMoradorDB.id_usuario == UsuarioDB.id).filter(
+        UsuarioDB.perfil == PerfilUsuarioEnum.Morador,
         VinculoMoradorDB.status_aprovacao == StatusVinculoEnum.Aprovado,
         VinculoMoradorDB.ativo == True,
         UnidadeDB.id_condominio == id_condominio
     ).order_by(UsuarioDB.nome).all()
 
 def remover_morador_da_unidade(db: Session, id_vinculo: int, id_condominio: int):
-    # RF21: Encerra o vínculo do morador com a unidade (soft delete, RN08).
-    # Sem nenhuma outra unidade, o morador deixa de pertencer ao condomínio e o usuário é inativado.
-    vinculo = db.query(VinculoMoradorDB).join(UnidadeDB).filter(
+    vinculo = db.query(VinculoMoradorDB).join(UnidadeDB).join(UsuarioDB, VinculoMoradorDB.id_usuario == UsuarioDB.id).filter(
+        UsuarioDB.perfil == PerfilUsuarioEnum.Morador, 
         VinculoMoradorDB.id == id_vinculo,
         VinculoMoradorDB.status_aprovacao == StatusVinculoEnum.Aprovado,
         VinculoMoradorDB.ativo == True,

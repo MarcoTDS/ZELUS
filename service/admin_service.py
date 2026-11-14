@@ -11,7 +11,7 @@ from models.vinculo import VinculoMoradorDB, StatusVinculoEnum
 from models.enums import StatusChamadoEnum
 from models.usuario import UsuarioDB
 from models.enums import PerfilUsuarioEnum, TipoTokenEnum
-from schemas.admin import CondominioCreate, CondominioUpdate, SindicoCreate
+from schemas.admin import CondominioCreate, CondominioUpdate, SindicoCreate, SindicoPromocao
 from service import token_service, unidade_service
 from service.usuario_service import obter_hash_senha, obter_usuario_por_email, URL_FRONTEND
 from service.email_service import enviar_email
@@ -194,9 +194,9 @@ def _enviar_acesso_sindico(db: Session, sindico: UsuarioDB, condominio_nome: str
 
 def _reaproveitar_ex_sindico(db: Session, usuario: UsuarioDB, nome: str):
     # Um ex-síndico (desvinculado e sem condomínio) pode assumir outro condomínio com a mesma conta.
-    # Cada usuário tem um único perfil: um morador que vira síndico recebe uma conta de síndico com outro e-mail.
+    # Um morador do próprio condomínio vira síndico pela promoção (promover_morador), sem criar outra conta.
     if usuario.perfil == PerfilUsuarioEnum.Morador:
-        raise HTTPException(status_code=409, detail="Este e-mail pertence a uma conta de morador. Para o morador assumir como síndico, cadastre-o com outro e-mail (a conta de morador continua valendo para abrir chamados).")
+        raise HTTPException(status_code=409, detail="Este e-mail pertence a uma conta de morador. Se ele mora neste condomínio, use \"Escolher entre os moradores\" para promovê-lo a síndico.")
     if usuario.perfil != PerfilUsuarioEnum.Sindico:
         raise HTTPException(status_code=409, detail="Já existe um usuário cadastrado com este e-mail.")
 
@@ -239,9 +239,89 @@ def cadastrar_sindico(db: Session, dados: SindicoCreate):
     resultado["id_condominio"] = condominio.id
     return resultado
 
+# ==========================================
+# PROMOÇÃO DE MORADOR A SÍNDICO (RF13, RN07)
+# ==========================================
+def _vinculos_aprovados(db: Session, id_usuario: int, id_condominio: int = None):
+    # Unidades aprovadas e ativas do usuário (opcionalmente só as de um condomínio)
+    query = db.query(VinculoMoradorDB).join(UnidadeDB).filter(
+        VinculoMoradorDB.id_usuario == id_usuario,
+        VinculoMoradorDB.status_aprovacao == StatusVinculoEnum.Aprovado,
+        VinculoMoradorDB.ativo == True,
+        UnidadeDB.ativo == True
+    )
+    if id_condominio is not None:
+        query = query.filter(UnidadeDB.id_condominio == id_condominio)
+    return query.all()
+
+def listar_moradores_elegiveis(db: Session, id_condominio: int):
+    # Moradores ativos com pelo menos uma unidade aprovada no condomínio (um item por pessoa)
+    vinculos = db.query(VinculoMoradorDB).join(UnidadeDB).join(UsuarioDB, VinculoMoradorDB.id_usuario == UsuarioDB.id).filter(
+        VinculoMoradorDB.status_aprovacao == StatusVinculoEnum.Aprovado,
+        VinculoMoradorDB.ativo == True,
+        UnidadeDB.ativo == True,
+        UnidadeDB.id_condominio == id_condominio,
+        UsuarioDB.ativo == True,
+        UsuarioDB.perfil == PerfilUsuarioEnum.Morador
+    ).order_by(UsuarioDB.nome, UnidadeDB.id).all()
+
+    moradores = {}
+    for vinculo in vinculos:
+        item = moradores.setdefault(vinculo.id_usuario, {
+            "id": vinculo.usuario.id,
+            "nome": vinculo.usuario.nome,
+            "email": vinculo.usuario.email,
+            "unidades": []
+        })
+        item["unidades"].append(vinculo.unidade.identificacao)
+    return list(moradores.values())
+
+def promover_morador(db: Session, dados: SindicoPromocao):
+    condominio = buscar_condominio(db, dados.id_condominio)
+    if not condominio:
+        raise HTTPException(status_code=404, detail="Condomínio não encontrado.")
+
+    # RN07: Cada condomínio possui exatamente um síndico responsável
+    if condominio.id_sindico is not None:
+        raise HTTPException(status_code=409, detail="Este condomínio já possui um síndico responsável.")
+
+    morador = db.query(UsuarioDB).filter(
+        UsuarioDB.id == dados.id_usuario,
+        UsuarioDB.ativo == True,
+        UsuarioDB.perfil == PerfilUsuarioEnum.Morador
+    ).first()
+    # Só moradores com unidade aprovada neste condomínio podem ser promovidos
+    if not morador or not _vinculos_aprovados(db, morador.id, condominio.id):
+        raise HTTPException(status_code=404, detail="Morador não encontrado neste condomínio.")
+
+    # O perfil muda para Síndico. As unidades continuam registradas (ele segue morando lá):
+    # se deixar de ser síndico, volta a ser morador (desvincular_sindico).
+    morador.perfil = PerfilUsuarioEnum.Sindico
+    condominio.id_sindico = morador.id
+    db.commit()
+
+    # Login e senha continuam os mesmos: o e-mail só avisa da promoção
+    email_enviado = enviar_email(
+        morador.email,
+        "Zelus - Você agora é o síndico",
+        f"Olá, {morador.nome}!\n\nVocê foi definido como síndico do condomínio {condominio.nome}.\n"
+        f"Entre no sistema com o mesmo e-mail e a mesma senha de sempre: {URL_FRONTEND}/views/auth/login.html\n"
+        f"A partir de agora você acompanha a fila de chamados do condomínio e também pode abrir chamados."
+    )
+
+    return {
+        "id_usuario": morador.id,
+        "nome": morador.nome,
+        "email": morador.email,
+        "id_condominio": condominio.id,
+        "email_enviado": email_enviado,
+        "promovido": True
+    }
+
 def desvincular_sindico(db: Session, id_condominio: int):
     # RN07, RN15: Tira o síndico do condomínio (troca de síndico ou encerramento do condomínio).
-    # Como cada síndico gerencia exatamente um condomínio, o usuário dele é inativado (RN08).
+    # Síndico que também é morador (foi promovido e ainda tem unidade aprovada) volta a ser morador.
+    # Os demais são inativados (RN08), já que cada síndico gerencia exatamente um condomínio.
     condominio = buscar_condominio(db, id_condominio)
     if not condominio:
         return None
@@ -252,7 +332,10 @@ def desvincular_sindico(db: Session, id_condominio: int):
     sindico = db.query(UsuarioDB).filter(UsuarioDB.id == condominio.id_sindico).first()
     condominio.id_sindico = None
     if sindico:
-        sindico.ativo = False
+        if _vinculos_aprovados(db, sindico.id):
+            sindico.perfil = PerfilUsuarioEnum.Morador
+        else:
+            sindico.ativo = False
 
     db.commit()
     db.refresh(condominio)

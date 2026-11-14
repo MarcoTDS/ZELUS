@@ -55,7 +55,7 @@ def _caminho_seguro(caminho_relativo: str) -> Path:
     return destino
 
 # ==========================================
-# ENVIO (morador autor do chamado)
+# ENVIO (autor do chamado: morador ou síndico)
 # ==========================================
 def salvar_anexo(db: Session, id_chamado: int, tipo: str, arquivo: UploadFile, usuario: dict):
     config = TIPOS_ANEXO[tipo]

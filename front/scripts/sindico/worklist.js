@@ -4,7 +4,7 @@ import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
 import { ROTAS } from "../shared/config.js";
 import { mostrarAlerta, limparAlerta, escaparHtml } from "../shared/ui.js";
-import { formatarTicket, descreverPrazo, seloStatus } from "../shared/formatos.js";
+import { formatarTicket, descreverPrazo, seloStatus, seloSindico } from "../shared/formatos.js";
 
 const usuario = await protegerPagina({ perfis: ["Sindico"] });
 montarCabecalho(usuario);
@@ -22,7 +22,7 @@ function montarItem(chamado) {
         <a href="${ROTAS.comum.chamado}?id=${chamado.id}" class="item-chamado urgencia-${urgencia}">
             <div class="d-flex justify-content-between align-items-start gap-2">
                 <span class="fw-semibold">${formatarTicket(chamado.id)} · ${escaparHtml(chamado.titulo)}</span>
-                ${seloStatus(chamado)}
+                <span class="d-flex gap-1 flex-shrink-0">${seloSindico(chamado)}${seloStatus(chamado)}</span>
             </div>
             <div class="small detalhe">
                 ${escaparHtml(chamado.categoria.nome)} · ${escaparHtml(chamado.unidade.identificacao)} · ${descreverPrazo(chamado.data_vencimento)}

@@ -1,4 +1,5 @@
 zelus_migracao_v3_para_v4.sql
+migracao_chamado_aberto_pelo_sindico.sql
 zelus_schema.sql
 env
 

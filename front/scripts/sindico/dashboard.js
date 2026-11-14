@@ -34,16 +34,18 @@ function liberarSaida(chamadosEmAberto) {
 botaoSair.addEventListener("click", async () => {
     if (!(await confirmar({
         titulo: "Sair do condomínio?",
-        mensagem: "Seu acesso como síndico será encerrado e o condomínio ficará sem síndico até o administrador cadastrar outro.",
+        mensagem: "Seu acesso como síndico será encerrado e o condomínio ficará sem síndico até o administrador cadastrar outro. Se você também mora no condomínio, poderá entrar de novo como morador.",
         textoConfirmar: "Sair do condomínio"
     }))) return;
 
     limparAlerta(alerta);
     definirCarregando(botaoSair, true, "Saindo...");
     try {
-        await api("/auth/me/sair-do-condominio", { metodo: "PATCH" });
+        const { mensagem } = await api("/auth/me/sair-do-condominio", { metodo: "PATCH" });
         sessao.limpar();
-        window.location.replace(`${ROTAS.login}?motivo=saiu`);
+        // Quem foi promovido e ainda tem unidade volta a ser morador: o login mostra outro aviso
+        const virouMorador = mensagem.includes("como morador");
+        window.location.replace(`${ROTAS.login}?motivo=${virouMorador ? "saiu-morador" : "saiu"}`);
     } catch (erro) {
         mostrarAlerta(alerta, erro.message);
         definirCarregando(botaoSair, false);

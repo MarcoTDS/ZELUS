@@ -64,7 +64,11 @@ def _query_condominio(db: Session, id_condominio: int):
 # ==========================================
 # ABERTURA (RF07, RN01, RN05, RN09)
 # ==========================================
-def criar_chamado(db: Session, dados: ChamadoCreate, id_autor: int, id_condominio: int):
+def criar_chamado(db: Session, dados: ChamadoCreate, usuario: dict):
+    id_autor = usuario["id"]
+    id_condominio = usuario["id_condominio"]
+    eh_sindico = usuario["perfil"] == "Sindico"
+
     unidade = db.query(UnidadeDB).filter(
         UnidadeDB.id == dados.id_unidade_destino,
         UnidadeDB.ativo == True
@@ -72,8 +76,9 @@ def criar_chamado(db: Session, dados: ChamadoCreate, id_autor: int, id_condomini
     if not unidade or unidade.id_condominio != id_condominio:
         raise HTTPException(status_code=404, detail="Unidade não encontrada.")
 
-    # RN05: O morador só abre chamados para as suas unidades aprovadas ou para áreas comuns
-    if unidade.tipo_unidade != TipoUnidadeEnum.Area_Comum:
+    # RN05: O morador só abre chamados para as suas unidades aprovadas ou para áreas comuns.
+    # O síndico pode registrar demandas de qualquer unidade do condomínio (RN14).
+    if not eh_sindico and unidade.tipo_unidade != TipoUnidadeEnum.Area_Comum:
         unidades_do_morador = [u.id for u in vinculo_service.listar_unidades_do_morador(db, id_autor)]
         if unidade.id not in unidades_do_morador:
             raise HTTPException(status_code=403, detail="Você só pode abrir chamados para as suas unidades ou para áreas comuns.")
@@ -106,7 +111,9 @@ def criar_chamado(db: Session, dados: ChamadoCreate, id_autor: int, id_condomini
         status=StatusChamadoEnum.Aberto,
         titulo=dados.titulo,
         descricao=dados.descricao,
-        prazo_sla_vigente=categoria.prazo_sla # RN01: SLA herdado da categoria no momento da abertura
+        prazo_sla_vigente=categoria.prazo_sla, # RN01: SLA herdado da categoria no momento da abertura
+        aberto_pelo_sindico=eh_sindico,
+        data_visto=datetime.utcnow() if eh_sindico else None # RN10: quem abriu já viu
     )
     db.add(novo_chamado)
     db.commit()
@@ -139,6 +146,14 @@ def listar_meus_chamados(db: Session, id_autor: int, ticket: int = None):
     )
     if ticket:
         query = query.filter(ChamadoDB.id == ticket)
+
+    return _preparar_lista(query.order_by(desc(ChamadoDB.data_abertura)).all())
+
+def listar_do_sindico(db: Session, id_condominio: int, somente_em_aberto: bool = False):
+    # Chamados abertos pelo síndico: aparecem no Dashboard do Morador para que ele fique ciente das demandas
+    query = _query_condominio(db, id_condominio).filter(ChamadoDB.aberto_pelo_sindico == True)
+    if somente_em_aberto:
+        query = query.filter(ChamadoDB.status.in_(STATUS_EM_ABERTO))
 
     return _preparar_lista(query.order_by(desc(ChamadoDB.data_abertura)).all())
 

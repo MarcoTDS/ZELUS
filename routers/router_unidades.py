@@ -5,13 +5,16 @@ from typing import List
 from database import get_db
 from schemas.unidade import UnidadeCreate, UnidadeUpdate, UnidadeResponse, UnidadeResumo
 from service import unidade_service
-from routers.dependencias import get_sindico, get_morador
+from routers.dependencias import get_sindico, get_morador_ou_sindico
 
 router_unidades = APIRouter(prefix="/unidades", tags=["Unidades"])
 
 @router_unidades.get("/para-chamado", response_model=List[UnidadeResumo], summary="RF07, RN05 - Unidades para abrir chamado")
-def listar_unidades_para_chamado(db: Session = Depends(get_db), usuario: dict = Depends(get_morador)):
-    """Unidades aprovadas do morador + áreas comuns do condomínio (dropdown "Unidade" da Tela de Novo Chamado)."""
+def listar_unidades_para_chamado(db: Session = Depends(get_db), usuario: dict = Depends(get_morador_ou_sindico)):
+    """Dropdown "Unidade" da Tela de Novo Chamado.
+    Morador: unidades aprovadas dele + áreas comuns. Síndico: todas as unidades ativas do condomínio."""
+    if usuario["perfil"] == "Sindico":
+        return unidade_service.listar_unidades(db, usuario["id_condominio"])
     return unidade_service.listar_unidades_para_chamado(db, usuario["id"], usuario["id_condominio"])
 
 @router_unidades.get("/", response_model=List[UnidadeResponse], summary="RF20 - Unidades do Condomínio")

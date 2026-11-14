@@ -61,6 +61,13 @@ const CLASSES_STATUS = {
     "Cancelado": "status-cancelado"
 };
 
+// Marcação dos chamados registrados pelo próprio síndico (vazio nos demais)
+export function seloSindico(chamado) {
+    return chamado.aberto_pelo_sindico
+        ? `<span class="badge badge-sindico" title="Chamado aberto pelo síndico"><i class="bi bi-megaphone" aria-hidden="true"></i> Síndico</span>`
+        : "";
+}
+
 export function seloStatus(chamado) {
     if (chamado.vencido) {
         return `<span class="badge selo-status status-vencido">Vencido</span>`;

@@ -45,22 +45,49 @@
           <div class="form-text">Cada condomínio tem um único síndico. Só aparecem os que ainda não têm.</div>
         </div>
 
-        <div class="mb-3">
-          <label for="nome" class="form-label small">Nome do Síndico</label>
-          <input type="text" class="form-control" id="nome" name="nome" placeholder="Nome completo" maxlength="120" required>
-          <div class="invalid-feedback">Informe o nome do síndico.</div>
-        </div>
+        <!-- Aparece quando o condomínio escolhido já tem moradores: leva à lista para promover um deles -->
+        <p class="small mb-3" id="aviso-moradores" hidden>
+          <i class="bi bi-people" aria-hidden="true"></i>
+          <span id="texto-moradores"></span>
+          <a href="#" class="link-zelus fw-semibold" id="link-moradores">Escolher entre os moradores</a>
+        </p>
 
-        <div class="mb-3">
-          <label for="email" class="form-label small">E-mail (login)</label>
-          <input type="email" class="form-control" id="email" name="email" placeholder="sindico@email.com" maxlength="120" required>
-          <div class="invalid-feedback">Informe um e-mail válido.</div>
-        </div>
+        <!-- Opção 1: pessoa nova (cria o usuário com senha provisória) -->
+        <fieldset id="campos-novo">
+          <div class="mb-3">
+            <label for="nome" class="form-label small">Nome do Síndico</label>
+            <input type="text" class="form-control" id="nome" name="nome" placeholder="Nome completo" maxlength="120" required>
+            <div class="invalid-feedback">Informe o nome do síndico.</div>
+          </div>
 
-        <div class="alert alert-zelus small mb-0" role="note">
-          A senha provisória e o link de validação são gerados automaticamente e enviados para o e-mail do síndico.
-          No primeiro acesso, será preciso validar o e-mail e trocar a senha.
-        </div>
+          <div class="mb-3">
+            <label for="email" class="form-label small">E-mail (login)</label>
+            <input type="email" class="form-control" id="email" name="email" placeholder="sindico@email.com" maxlength="120" required>
+            <div class="invalid-feedback">Informe um e-mail válido.</div>
+          </div>
+
+          <div class="alert alert-zelus small mb-0" role="note">
+            A senha provisória e o link de validação são gerados automaticamente e enviados para o e-mail do síndico.
+            No primeiro acesso, será preciso validar o e-mail e trocar a senha.
+          </div>
+        </fieldset>
+
+        <!-- Opção 2: promover um morador do condomínio (mesmo login e senha) -->
+        <fieldset id="campos-promover" hidden disabled>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <legend class="form-label small mb-0 w-auto float-none">Moradores do condomínio</legend>
+            <a href="#" class="small link-zelus" id="link-pessoa-nova">Cadastrar outra pessoa</a>
+          </div>
+          <input type="search" class="form-control form-control-sm mb-2" id="busca-morador" placeholder="Buscar por nome, e-mail ou unidade" aria-label="Buscar morador" hidden>
+          <!-- Preenchida pelo script: um item por morador -->
+          <div class="lista-moradores mb-2" id="lista-moradores" role="radiogroup" aria-label="Escolha o morador"></div>
+          <div class="small text-danger mb-2" id="erro-morador" hidden>Escolha o morador que será o síndico.</div>
+
+          <div class="alert alert-zelus small mb-0" role="note">
+            O morador passa a ser o síndico e continua entrando com o mesmo e-mail e a mesma senha (ele recebe um e-mail avisando).
+            As unidades dele continuam registradas: se deixar de ser síndico, volta a ser morador.
+          </div>
+        </fieldset>
 
         <button type="submit" class="btn btn-zelus w-100 mt-4" id="btn-cadastrar">Cadastrar Síndico</button>
 
@@ -71,7 +98,7 @@
     <div id="resultado" class="card shadow-sm mt-2" hidden>
       <div class="card-body p-4">
         <p class="rotulo-pagina">Administrador</p>
-        <h1 class="h4 mb-3">Síndico Cadastrado</h1>
+        <h1 class="h4 mb-3" id="titulo-resultado">Síndico Cadastrado</h1>
 
         <!-- Link de validação e senha provisória, preenchido pelo script -->
         <div id="acesso-sindico"></div>

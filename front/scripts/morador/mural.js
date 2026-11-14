@@ -6,7 +6,7 @@ import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
 import { ROTAS } from "../shared/config.js";
 import { mostrarAlerta, limparAlerta, escaparHtml } from "../shared/ui.js";
-import { formatarTicket, descreverPrazo, seloStatus, formatarDataHora } from "../shared/formatos.js";
+import { formatarTicket, descreverPrazo, seloStatus, seloSindico, formatarDataHora } from "../shared/formatos.js";
 
 const usuario = await protegerPagina({ perfis: ["Morador"] });
 montarCabecalho(usuario);
@@ -17,6 +17,10 @@ const resumo = document.getElementById("resumo");
 const formBusca = document.getElementById("form-busca");
 const campoTicket = document.getElementById("ticket");
 const filtroStatus = document.getElementById("filtro-status");
+
+// mural.html?filtro=sindico: vem do link "Ver todos no mural" das demandas do síndico (dashboard)
+const filtroInicial = new URLSearchParams(window.location.search).get("filtro");
+if ([...filtroStatus.options].some((opcao) => opcao.value === filtroInicial)) filtroStatus.value = filtroInicial;
 
 // Todos os chamados como vieram da API
 let chamados = [];
@@ -30,7 +34,7 @@ function montarItem(chamado) {
     const classeUrgencia = urgencia ? `urgencia-${urgencia}` : "";
 
     // Se a API informar quem abriu / se é do morador logado, mostramos; senão, só a data
-    const solicitante = chamado.meu ? "você" : (chamado.solicitante || chamado.autor?.nome || "");
+    const solicitante = chamado.meu ? "você" : (chamado.aberto_pelo_sindico ? "síndico" : (chamado.solicitante || chamado.autor?.nome || ""));
     const abertoPor = solicitante ? ` por ${escaparHtml(solicitante)}` : "";
     const selo = chamado.meu ? `<span class="badge badge-voce">Você</span>` : "";
 
@@ -40,7 +44,7 @@ function montarItem(chamado) {
         <a href="${ROTAS.comum.chamado}?id=${chamado.id}" class="item-chamado ${classeUrgencia}">
             <div class="d-flex justify-content-between align-items-start gap-2">
                 <span class="fw-semibold">${formatarTicket(chamado.id)} · ${escaparHtml(chamado.titulo)}</span>
-                <span class="d-flex gap-1 flex-shrink-0">${selo}${seloStatus(chamado)}</span>
+                <span class="d-flex gap-1 flex-shrink-0">${selo}${seloSindico(chamado)}${seloStatus(chamado)}</span>
             </div>
             <div class="small detalhe">
                 ${escaparHtml(chamado.categoria.nome)} · ${escaparHtml(chamado.unidade.identificacao)}
@@ -58,6 +62,7 @@ function aplicarFiltros() {
         if (ticket && !String(chamado.id).includes(ticket)) return false;
         if (situacao === "abertos" && finalizado(chamado)) return false;
         if (situacao === "finalizados" && !finalizado(chamado)) return false;
+        if (situacao === "sindico" && !chamado.aberto_pelo_sindico) return false;
         return true;
     });
 
@@ -70,6 +75,7 @@ function aplicarFiltros() {
         let mensagem;
         if (chamados.length === 0) mensagem = "Nenhum chamado registrado no condomínio ainda.";
         else if (ticket) mensagem = "Nenhum chamado encontrado com esse número.";
+        else if (situacao === "sindico") mensagem = "O síndico ainda não abriu nenhum chamado.";
         else if (situacao === "abertos") mensagem = "Nenhum chamado em aberto no condomínio. Tudo em dia!";
         else mensagem = "Nenhum chamado nessa situação.";
         lista.innerHTML = `<p class="texto-suave">${mensagem}</p>`;

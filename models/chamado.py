@@ -22,6 +22,7 @@ class ChamadoDB(Base):
     status = Column(StatusChamadoType, nullable=False, default=StatusChamadoEnum.Aberto)
     data_visto = Column(DateTime, nullable=True)
     data_abertura = Column(DateTime, nullable=False, default=datetime.utcnow)
+    aberto_pelo_sindico = Column(Boolean, nullable=False, default=False) # Chamado registrado pelo próprio síndico (aparece para os moradores)
     ativo = Column(Boolean, nullable=False, default=True)
     
     autor = relationship("UsuarioDB")

@@ -3,7 +3,8 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from database import get_db
-from schemas.admin import CondominioCreate, CondominioUpdate, CondominioResponse, SindicoCreate, SindicoCriadoResponse
+from schemas.admin import (CondominioCreate, CondominioUpdate, CondominioResponse, SindicoCreate, SindicoCriadoResponse,
+                           SindicoPromocao, MoradorElegivelResponse)
 from schemas.unidade import UnidadeCreate, UnidadeUpdate, UnidadeResponse
 from schemas.usuario import UsuarioResponse
 from service import admin_service, unidade_service, usuario_service
@@ -53,7 +54,8 @@ def reativar_condominio(id_condominio: int, db: Session = Depends(get_db)):
 
 @router_admin.patch("/condominios/{id_condominio}/desvincular-sindico", response_model=CondominioResponse, summary="RN07, RN15 - Desvincular Síndico")
 def desvincular_sindico(id_condominio: int, db: Session = Depends(get_db)):
-    """Tira o síndico do condomínio e inativa o usuário dele. O condomínio pode receber um novo síndico (RF13)."""
+    """Tira o síndico do condomínio. Se ele também é morador (foi promovido), volta a ser morador; senão, o usuário é inativado.
+    O condomínio pode receber um novo síndico (RF13)."""
     condominio = admin_service.desvincular_sindico(db, id_condominio)
     if not condominio:
         raise HTTPException(status_code=404, detail="Condomínio não encontrado.")
@@ -92,6 +94,18 @@ def inativar_unidade(id_condominio: int, id_unidade: int, db: Session = Depends(
 def cadastrar_sindico(dados_sindico: SindicoCreate, db: Session = Depends(get_db)):
     """Gera a senha provisória e o link de validação (e-mail simulado no terminal e retornado na resposta)."""
     return admin_service.cadastrar_sindico(db, dados_sindico)
+
+@router_admin.get("/condominios/{id_condominio}/moradores", response_model=List[MoradorElegivelResponse], summary="RF13 - Moradores que podem ser promovidos a síndico")
+def listar_moradores_para_sindico(id_condominio: int, db: Session = Depends(get_db)):
+    """Moradores ativos com unidade aprovada no condomínio (link "Escolher entre os moradores" da Tela de Cadastro de Síndico)."""
+    _condominio_ou_404(db, id_condominio)
+    return admin_service.listar_moradores_elegiveis(db, id_condominio)
+
+@router_admin.post("/sindicos/promover", response_model=SindicoCriadoResponse, summary="RF13 - Promover morador a síndico")
+def promover_morador_a_sindico(dados: SindicoPromocao, db: Session = Depends(get_db)):
+    """O morador passa a ter o perfil Síndico, com o mesmo login e senha. As unidades dele continuam registradas:
+    se ele deixar de ser síndico, volta a ser morador."""
+    return admin_service.promover_morador(db, dados)
 
 @router_admin.post("/sindicos/{id_usuario}/reenviar-validacao", response_model=SindicoCriadoResponse, summary="RN12 - Reenviar link de validação")
 def reenviar_link_validacao(id_usuario: int, db: Session = Depends(get_db)):

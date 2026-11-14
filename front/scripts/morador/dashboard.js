@@ -4,7 +4,7 @@ import { protegerPagina } from "../shared/auth-guard.js";
 import { montarCabecalho } from "../shared/layout.js";
 import { mostrarAlerta, escaparHtml } from "../shared/ui.js";
 import { ROTAS } from "../shared/config.js";
-import { lerDataApi } from "../shared/formatos.js";
+import { lerDataApi, seloSindico } from "../shared/formatos.js";
 import { atualizarPeriodicamente } from "../shared/atualizacao.js";
 
 const usuario = await protegerPagina({ perfis: ["Morador"] });
@@ -12,6 +12,7 @@ montarCabecalho(usuario);
 
 const alerta = document.getElementById("alerta");
 const lista = document.getElementById("lista-chamados");
+const listaSindico = document.getElementById("lista-sindico");
 const campoBusca = document.getElementById("busca");
 
 // Nome de um campo que pode vir como texto ou como objeto (ex.: { nome } ou { identificacao })
@@ -52,7 +53,7 @@ function montarItem(chamado) {
         <a href="${ROTAS.comum.chamado}?id=${encodeURIComponent(chamado.id)}" class="item-chamado${urgencia}">
             <div class="d-flex justify-content-between align-items-center gap-2">
                 <span class="fw-semibold">#${chamado.id} · ${escaparHtml(chamado.titulo)}</span>
-                <span class="badge ${classeBadge}">${escaparHtml(status)}</span>
+                <span class="d-flex gap-1 flex-shrink-0">${seloSindico(chamado)}<span class="badge ${classeBadge}">${escaparHtml(status)}</span></span>
             </div>
             <p class="small detalhe mb-0">
                 ${escaparHtml(nomeDe(chamado.categoria))} · ${escaparHtml(nomeDe(chamado.unidade))} · Aberto em ${formatarData(chamado.data_abertura)}
@@ -96,7 +97,24 @@ async function carregarChamados({ silencioso = false } = {}) {
     }
 }
 
-await carregarChamados();
+// Demandas do síndico em aberto (chamados que ele mesmo registrou)
+async function carregarDemandasSindico({ silencioso = false } = {}) {
+    try {
+        const demandas = await api("/chamados/do-sindico?somente_em_aberto=true");
+        listaSindico.innerHTML = demandas.length
+            ? demandas.map(montarItem).join("")
+            : `<p class="texto-suave">Nenhuma demanda do síndico em aberto no momento.</p>`;
+    } catch (erro) {
+        if (silencioso) throw erro;
+        listaSindico.innerHTML = "";
+        mostrarAlerta(alerta, erro.message);
+    }
+}
+
+await Promise.all([carregarChamados(), carregarDemandasSindico()]);
 
 // Mudanças de status feitas pelo síndico aparecem sem recarregar a página (mantém a busca digitada)
-atualizarPeriodicamente(() => carregarChamados({ silencioso: true }));
+atualizarPeriodicamente(() => Promise.all([
+    carregarChamados({ silencioso: true }),
+    carregarDemandasSindico({ silencioso: true })
+]));

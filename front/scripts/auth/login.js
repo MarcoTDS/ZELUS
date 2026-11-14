@@ -11,7 +11,8 @@ const MENSAGENS_MOTIVO = {
     sessao: ["Sua sessão expirou. Faça login novamente.", "warning"],
     pendente: ["Seu cadastro ainda está pendente de aprovação pelo síndico.", "warning"],
     senha: ["Senha redefinida com sucesso. Faça login com a nova senha.", "success"],
-    saiu: ["Você saiu do condomínio e seu acesso como síndico foi encerrado.", "success"]
+    saiu: ["Você saiu do condomínio e seu acesso como síndico foi encerrado.", "success"],
+    "saiu-morador": ["Você deixou de ser o síndico. Entre de novo para acessar como morador.", "success"]
 };
 
 const MENSAGENS_VINCULO = {
