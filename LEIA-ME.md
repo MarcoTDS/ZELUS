@@ -18,7 +18,7 @@ front/
 
 ## Como rodar
 1. API: `uvicorn main:app --reload` (porta 8000).
-2. VS Code: "Go Live". Com o `.vscode/settings.json`, o Live Server abre a pasta `front/` como raiz, então o login fica em `http://127.0.0.1:5500/views/auth/login.html`.
+2. VS Code: "Go Live". Com o `.vscode/settings.json`, o Live Server abre a pasta `front/` como raiz, então o login fica em `http://127.0.0.1:5500/views/auth/index.html`.
    Se preferir não usar o settings.json, clique com o botão direito em `front/` e use o Live Server a partir dela.
 
 ## Como uma tela nova usa a base
