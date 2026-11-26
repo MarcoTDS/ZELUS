@@ -24,10 +24,10 @@
   <!-- Tela Editar Perfil do morador (RF15) -->
   <main class="zelus-pagina">
 
-    <a href="../morador/dashboard.html" class="voltar"><i class="bi bi-arrow-left"></i> Voltar ao dashboard</a>
+    <a href="../morador/dashboard.html" class="voltar" id="link-voltar"><i class="bi bi-arrow-left"></i> Voltar ao dashboard</a>
 
-    <p class="rotulo-pagina mt-3">Morador</p>
-    <h1 class="h3 mb-3">Meu perfil</h1>
+    <p class="rotulo-pagina mt-3" id="rotulo-perfil">Morador</p>
+    <h1 class="h3 mb-3">Meu Perfil</h1>
 
     <div id="alerta"></div>
 
@@ -35,7 +35,7 @@
     <form id="form-dados" class="card shadow-sm mb-3" novalidate>
       <div class="card-body p-4">
 
-        <h2 class="h6 fw-semibold mb-3">Dados pessoais</h2>
+        <h2 class="h6 fw-semibold mb-3">Dados Pessoais</h2>
 
         <div class="mb-3">
           <label for="nome" class="form-label small">Nome completo</label>
@@ -45,31 +45,30 @@
 
         <div class="mb-3">
           <label for="email" class="form-label small">E-mail (login)</label>
-          <input type="email" class="form-control" id="email" name="email" maxlength="150" required disabled>
-          <div class="invalid-feedback">Informe um e-mail válido.</div>
+          <input type="email" class="form-control" id="email" name="email" readonly disabled>
         </div>
 
         <!-- Só leitura: unidade e condomínio são definidos no cadastro / pelo síndico -->
         <div class="row g-2 mb-1">
-          <div class="col-md-6">
+          <div class="col-md-6" id="grupo-unidade">
             <label for="unidade" class="form-label small">Unidade</label>
             <input type="text" class="form-control" id="unidade" readonly disabled>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-6" id="grupo-condominio">
             <label for="condominio" class="form-label small">Condomínio</label>
             <input type="text" class="form-control" id="condominio" readonly disabled>
           </div>
         </div>
-        <p class="form-text mb-0">Para trocar de unidade, fale com o síndico.</p>
+        <p class="form-text mb-0" id="aviso-bloqueado">Só o nome pode ser alterado. Para trocar de unidade, fale com o síndico.</p>
 
-        <button type="submit" class="btn btn-zelus w-100 mt-4" id="btn-salvar" disabled>Salvar dados</button>
+        <button type="submit" class="btn btn-zelus w-100 mt-4" id="btn-salvar" disabled>Salvar Dados</button>
 
       </div>
     </form>
 
     <!-- A troca de senha fica em outra tela -->
     <p class="small texto-suave">
-      Quer trocar a senha? <a href="alterar-senha.html" class="link-zelus">Alterar senha</a>
+      Quer trocar a senha? <a href="alterar-senha.html" class="link-zelus">Alterar Senha</a>
     </p>
 
   </main>

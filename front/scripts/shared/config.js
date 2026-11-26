@@ -71,6 +71,6 @@ export const MENUS = {
 
 // Itens do menu do usuário (lado direito da navbar), comuns ou por perfil
 export const MENU_USUARIO = [
-    { texto: "Editar perfil", icone: "bi-person", rota: ROTAS.comum.perfil, perfis: ["Morador"] }, // RF15
+    { texto: "Editar perfil", icone: "bi-person", rota: ROTAS.comum.perfil, perfis: ["Morador", "Sindico"] }, // RF15
     { texto: "Alterar senha", icone: "bi-key", rota: ROTAS.comum.alterarSenha }                    // RF16
 ];
